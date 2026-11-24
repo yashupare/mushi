@@ -4,9 +4,6 @@ A plugin powered music player for Android, iOS, Windows, macOS and Linux, built 
 Multiplatform. Music metadata and audio come from plugins; Group Jam lets friends listen to the
 same music at the same moment on their own devices.
 
-Mushi is based on [Spotube](https://github.com/KRTirtho/spotube) by Kingkor Roy Tirtho and
-Spotube Contributors, and uses the Spotube plugin ecosystem for its music sources.
-
 ## Building from source
 
 ### 1. Prerequisites
@@ -162,9 +159,4 @@ Optional Gradle properties (in `gradle.properties` or with `-P`):
 Copyright (C) 2026 yashupare and Mushi Contributors.
 
 Mushi is licensed under the [GNU Affero General Public License v3.0 or later](LICENSE). See
-[NOTICE](NOTICE) for who holds which copyright and for third-party licences.
-
-It is a modified version of Spotube, Copyright (C) 2026 Kingkor Roy Tirtho and Spotube
-Contributors, changed by the Mushi contributors from 2026-11-24 (renamed, rebranded and
-customised). If you distribute Mushi or run a modified version for others, the AGPL requires you
-to offer them its complete source code.
+[NOTICE](NOTICE) for copyright, attribution and third-party licences.

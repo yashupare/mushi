@@ -246,8 +246,8 @@ fun App(
                     com.mushi.app.core.ui.component.StartupIntro()
                 }
                 content()
-                // The update checker points at the upstream project, so it stays off here.
-                availableAppUpdate?.takeIf { com.mushi.app.core.AppEdition.UPSTREAM_LINKS_ENABLED }?.let { update ->
+                // Offers newer releases from Mushi's GitHub repository.
+                availableAppUpdate?.takeIf { com.mushi.app.core.AppEdition.APP_UPDATES_ENABLED }?.let { update ->
                     AppUpdateDialog(
                         update = update,
                         onDismiss = appUpdateService::dismissUpdate,

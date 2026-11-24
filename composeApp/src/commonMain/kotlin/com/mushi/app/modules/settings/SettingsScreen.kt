@@ -157,6 +157,8 @@ private fun CompactSettingsContent(
                     supportSection(
                         settings = settings,
                         settingsViewModel = settingsViewModel)
+                }
+                if (AppEdition.APP_UPDATES_ENABLED) {
                     updatesSection(
                         settings = settings,
                         settingsViewModel = settingsViewModel)

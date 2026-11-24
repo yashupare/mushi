@@ -23,4 +23,10 @@ object AppEdition {
      * `false` for the Mushi build.
      */
     const val UPSTREAM_LINKS_ENABLED: Boolean = false
+
+    /**
+     * Whether the app checks Mushi's own GitHub releases (`mushi.repositoryUrl` in
+     * gradle.properties) and offers newer versions. A blank repository URL also turns it off.
+     */
+    const val APP_UPDATES_ENABLED: Boolean = true
 }

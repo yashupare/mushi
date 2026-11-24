@@ -1,0 +1,118 @@
+*.iml
+.kotlin
+.gradle
+**/build/
+xcuserdata
+!src/**/build/
+local.properties
+.idea
+.DS_Store
+captures
+.externalNativeBuild
+.cxx
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/project.xcworkspace/
+!*.xcworkspace/contents.xcworkspacedata
+**/xcshareddata/WorkspaceSettings.xcsettings
+iosApp/Pods/
+node_modules/
+composeApp/release/
+
+**/*.log
+
+/composeApp/vlc-natives/
+
+
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.atom/
+.buildlog/
+.history
+.svn/
+
+
+# IntelliJ related
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+
+# Web related
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+*.pkg.tar.zst
+/aur-struct/*.tar
+/aur-struct/src
+/aur-struct/pkg
+
+/deb-struct/usr
+/linux/packaging/deb/usr
+
+/AppDir
+/appimage-builder-cache
+*.AppImage
+
+/.flatpak
+/.flatpak-builder
+
+/iscc
+installer.exe
+
+/choco-struct/tools/*.exe
+
+# secrets
+*.env
+lib/collections/env.g.dart
+help.txt
+
+dist
+appimage-build
+
+android/key.properties
+
+**/pb_data
+
+tm.json
+
+# FVM Version Cache
+.fvm/
+
+android/build
+android/app/.cxx
+
+/node_modules
+/package.json
+/package-lock.json
+/bun.lock
+
+**/target/

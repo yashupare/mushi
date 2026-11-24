@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Animated splash logo (Android 12+), about 800 ms: the arches draw in, the dot pops,
+     then two sound waves ripple out. Android recommends keeping this under 1000 ms. -->
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+    <aapt:attr name="android:drawable">
+        <vector android:width="288dp"
+            android:height="288dp"
+            android:viewportWidth="288"
+            android:viewportHeight="288">
+            <group
+                android:scaleX="2.2"
+                android:scaleY="2.2"
+                android:translateX="34.0"
+                android:translateY="45.77">
+                    <group android:name="waveBigGroup" android:pivotX="50" android:pivotY="29" android:scaleX="0.4" android:scaleY="0.4">
+                        <path android:name="waveBig" android:pathData="M32,22A26,26 0 0,1 68,22" android:fillColor="#00000000" android:strokeColor="#FFFF4D6D"
+                            android:strokeAlpha="0" android:strokeWidth="3" android:strokeLineCap="round" />
+                    </group>
+                    <group android:name="waveSmallGroup" android:pivotX="50" android:pivotY="29" android:scaleX="0.4" android:scaleY="0.4">
+                        <path android:name="waveSmall" android:pathData="M39,25A15,15 0 0,1 61,25" android:fillColor="#00000000" android:strokeColor="#FFFF4D6D"
+                            android:strokeAlpha="0" android:strokeWidth="3" android:strokeLineCap="round" />
+                    </group>
+                    <path android:name="archA" android:pathData="M29,72V52A10.5,10.5 0 0,1 50,52V72" android:fillColor="#00000000"
+                        android:strokeWidth="8" android:strokeLineCap="round" android:strokeLineJoin="round" android:trimPathEnd="0">
+                        <aapt:attr name="android:strokeColor">
+                            <gradient
+                                android:type="linear"
+                                android:startX="25" android:startY="13"
+                                android:endX="75" android:endY="76">
+                                <item android:offset="0" android:color="#FFFF8A5B" />
+                                <item android:offset="0.55" android:color="#FFFF4D6D" />
+                                <item android:offset="1" android:color="#FFD6336C" />
+                            </gradient>
+                        </aapt:attr>
+                    </path>
+                    <path android:name="archB" android:pathData="M50,52A10.5,10.5 0 0,1 71,52V72" android:fillColor="#00000000"
+                        android:strokeWidth="8" android:strokeLineCap="round" android:strokeLineJoin="round" android:trimPathEnd="0">
+                        <aapt:attr name="android:strokeColor">
+                            <gradient
+                                android:type="linear"
+                                android:startX="25" android:startY="13"
+                                android:endX="75" android:endY="76">
+                                <item android:offset="0" android:color="#FFFF8A5B" />
+                                <item android:offset="0.55" android:color="#FFFF4D6D" />
+                                <item android:offset="1" android:color="#FFD6336C" />
+                            </gradient>
+                        </aapt:attr>
+                    </path>
+                    <group android:name="dot" android:pivotX="50" android:pivotY="29" android:scaleX="0" android:scaleY="0">
+                        <path android:pathData="M45,29a5,5 0 1,0 10,0a5,5 0 1,0 -10,0z">
+                            <aapt:attr name="android:fillColor">
+                            <gradient
+                                android:type="linear"
+                                android:startX="25" android:startY="13"
+                                android:endX="75" android:endY="76">
+                                <item android:offset="0" android:color="#FFFF8A5B" />
+                                <item android:offset="0.55" android:color="#FFFF4D6D" />
+                                <item android:offset="1" android:color="#FFD6336C" />
+                            </gradient>
+                        </aapt:attr>
+                        </path>
+                    </group>
+            </group>
+        </vector>
+    </aapt:attr>
+    <target android:name="archA">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="trimPathEnd" android:valueFrom="0" android:valueTo="1" android:valueType="floatType" android:startOffset="0" android:duration="450" android:interpolator="@android:interpolator/fast_out_slow_in" />
+        </aapt:attr>
+    </target>
+    <target android:name="archB">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="trimPathEnd" android:valueFrom="0" android:valueTo="1" android:valueType="floatType" android:startOffset="90" android:duration="450" android:interpolator="@android:interpolator/fast_out_slow_in" />
+        </aapt:attr>
+    </target>
+    <target android:name="dot">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator android:propertyName="scaleX" android:valueFrom="0" android:valueTo="1" android:valueType="floatType" android:startOffset="320" android:duration="380" android:interpolator="@android:interpolator/overshoot" />
+                <objectAnimator android:propertyName="scaleY" android:valueFrom="0" android:valueTo="1" android:valueType="floatType" android:startOffset="320" android:duration="380" android:interpolator="@android:interpolator/overshoot" />
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="waveSmallGroup">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator android:propertyName="scaleX" android:valueFrom="0.4" android:valueTo="1" android:valueType="floatType" android:startOffset="480" android:duration="280" android:interpolator="@android:interpolator/decelerate_quad" />
+                <objectAnimator android:propertyName="scaleY" android:valueFrom="0.4" android:valueTo="1" android:valueType="floatType" android:startOffset="480" android:duration="280" android:interpolator="@android:interpolator/decelerate_quad" />
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="waveSmall">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="strokeAlpha" android:valueFrom="0" android:valueTo="0.55" android:valueType="floatType" android:startOffset="480" android:duration="280" android:interpolator="@android:interpolator/linear" />
+        </aapt:attr>
+    </target>
+    <target android:name="waveBigGroup">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator android:propertyName="scaleX" android:valueFrom="0.4" android:valueTo="1" android:valueType="floatType" android:startOffset="580" android:duration="220" android:interpolator="@android:interpolator/decelerate_quad" />
+                <objectAnimator android:propertyName="scaleY" android:valueFrom="0.4" android:valueTo="1" android:valueType="floatType" android:startOffset="580" android:duration="220" android:interpolator="@android:interpolator/decelerate_quad" />
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="waveBig">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="strokeAlpha" android:valueFrom="0" android:valueTo="0.55" android:valueType="floatType" android:startOffset="580" android:duration="220" android:interpolator="@android:interpolator/linear" />
+        </aapt:attr>
+    </target>
+</animated-vector>

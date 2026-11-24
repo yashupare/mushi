@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.mushi.app</id>
+
+  <name>Mushi</name>
+  <summary>Plugin powered music player</summary>
+  <developer id="com.mushi">
+    <name>Mushi contributors</name>
+  </developer>
+
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>AGPL-3.0-or-later</project_license>
+
+  <description>
+    <p>
+      A cross-platform, extensible, open source music streaming platform. Bring your own music
+      metadata, playlists and audio sources with plugins made by the community or by yourself.
+    </p>
+    <ul>
+      <li>Plugin powered: supports any platform or custom music service through plugins</li>
+      <li>Community driven plugins for popular platforms, or create your own</li>
+      <li>Freely downloadable tracks with tagged metadata</li>
+      <li>Time synced lyrics regardless of plugin support</li>
+      <li>No telemetry, diagnostics or user data collection</li>
+      <li>Small size, low data usage and native performance</li>
+    </ul>
+  </description>
+
+  <launchable type="desktop-id">com.mushi.app.desktop</launchable>
+
+  <categories>
+    <category>AudioVideo</category>
+    <category>Audio</category>
+    <category>Music</category>
+  </categories>
+  <keywords>
+    <keyword>music</keyword>
+    <keyword>streaming</keyword>
+    <keyword>player</keyword>
+    <keyword>lyrics</keyword>
+  </keywords>
+
+
+
+  <branding>
+    <color type="primary" scheme_preference="light">#E11D48</color>
+    <color type="primary" scheme_preference="dark">#FF4D6D</color>
+  </branding>
+
+  <content_rating type="oars-1.1" />
+
+  <requires>
+    <display_length compare="ge">360</display_length>
+  </requires>
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+    <control>touch</control>
+  </supports>
+
+  <!-- Generated from the git-cliff changelog (RenderPackagingTask) -->
+  <releases>
+{{#releases}}
+    <release version="{{version}}" date="{{date}}">
+      <url type="details">{{url}}</url>
+{{#notes}}
+      <description>
+{{#groups}}
+        <p>{{title}}</p>
+        <ul>
+{{#entries}}
+          <li>{{text}}</li>
+{{/entries}}
+        </ul>
+{{/groups}}
+      </description>
+{{/notes}}
+    </release>
+{{/releases}}
+  </releases>
+</component>

@@ -1,0 +1,10 @@
+package org.spotube.js_plugin_example.plugin_apis.scrobble
+
+import org.spotube.plugin_interfaces.plugin_apis.scrobble.ScrobbleAPI
+import org.spotube.plugin_interfaces.plugin_apis.scrobble.ScrobbleTrack
+
+class RealScrobbleAPI: ScrobbleAPI {
+    override suspend fun scrobble(track: ScrobbleTrack) {
+        // No Op
+    }
+}

@@ -1,0 +1,26 @@
+# Baseline Profile for Mushi: code Android should compile ahead of time at install, so the app
+# doesn't start out interpreted (measured on the emulator: janky frames 34% -> 15% once compiled).
+# AndroidX libraries (Compose, Media3, ...) ship their own profiles; this covers the app's own
+# code and the libraries it leans on per frame that don't.
+#
+# H = hot (compile), S = run at startup, P = run after startup. Wildcards are expanded at build time.
+
+# The app itself.
+HSPLcom/mushi/app/**->**(**)**
+Lcom/mushi/app/**;
+
+# The UI component library and its unstyled base, used by every screen.
+HSPLorg/spotube/millennium/**->**(**)**
+Lorg/spotube/millennium/**;
+HSPLcom/composeunstyled/**->**(**)**
+Lcom/composeunstyled/**;
+
+# Image loading for covers, and the glass blur.
+HSPLcoil3/**->**(**)**
+Lcoil3/**;
+HSPLdev/chrisbanes/haze/**->**(**)**
+Ldev/chrisbanes/haze/**;
+
+# Dependency injection, used while every screen is built.
+HSPLorg/koin/**->**(**)**
+Lorg/koin/**;

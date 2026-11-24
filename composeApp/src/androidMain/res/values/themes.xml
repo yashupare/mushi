@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Every Mushi palette starts from a near-black base, so launch uses one dark colour and
+         the app never opens on a white window. -->
+    <color name="mushi_launch_background">#FF0A0A0C</color>
+
+    <!-- The app's window theme. Dark, with the launch colour as the window background, so
+         nothing light shows before Compose draws its first frame. -->
+    <style name="Theme.Mushi" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/mushi_launch_background</item>
+    </style>
+
+    <!-- Launch theme for MainActivity: the AndroidX splash screen with the animated logo
+         (drawable-v31) on Android 12+, and the still logo on Android 9-11. -->
+    <style name="Theme.Mushi.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/mushi_launch_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_logo</item>
+        <item name="windowSplashScreenAnimationDuration">800</item>
+        <item name="postSplashScreenTheme">@style/Theme.Mushi</item>
+    </style>
+</resources>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Themed (monochrome) icon layer: the same mark in white; the launcher recolours it. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="0.8"
+        android:scaleY="0.8"
+        android:translateX="14.0"
+        android:translateY="18.28">
+            <group android:pivotX="50" android:pivotY="29">
+                <path android:pathData="M32,22A26,26 0 0,1 68,22" android:fillColor="#00000000" android:strokeColor="#FFFFFFFF"
+                    android:strokeAlpha="0.55" android:strokeWidth="3" android:strokeLineCap="round" />
+            </group>
+            <group android:pivotX="50" android:pivotY="29">
+                <path android:pathData="M39,25A15,15 0 0,1 61,25" android:fillColor="#00000000" android:strokeColor="#FFFFFFFF"
+                    android:strokeAlpha="0.55" android:strokeWidth="3" android:strokeLineCap="round" />
+            </group>
+            <path android:pathData="M29,72V52A10.5,10.5 0 0,1 50,52V72" android:fillColor="#00000000" android:strokeColor="#FFFFFFFF"
+                android:strokeWidth="8" android:strokeLineCap="round" android:strokeLineJoin="round" />
+            <path android:pathData="M50,52A10.5,10.5 0 0,1 71,52V72" android:fillColor="#00000000" android:strokeColor="#FFFFFFFF"
+                android:strokeWidth="8" android:strokeLineCap="round" android:strokeLineJoin="round" />
+            <group android:pivotX="50" android:pivotY="29">
+                <path android:pathData="M45,29a5,5 0 1,0 10,0a5,5 0 1,0 -10,0z" android:fillColor="#FFFFFFFF" />
+            </group>
+    </group>
+</vector>

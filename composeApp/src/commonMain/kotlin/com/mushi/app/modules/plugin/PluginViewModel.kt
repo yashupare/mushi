@@ -1,0 +1,653 @@
+package com.mushi.app.modules.plugin
+
+import com.mushi.app.core.network.HttpClientFactory
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.mushi.app.core.di.injectLogger
+import com.mushi.app.core.webview.WebViewController
+import com.mushi.app.core.zipline.PluginService
+import io.github.vinceglb.filekit.PlatformFile
+import io.github.vinceglb.filekit.readBytes
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import net.swiftzer.semver.SemVer
+import okio.FileSystem
+import okio.Path
+import okio.Path.Companion.toPath
+import okio.SYSTEM
+import org.koin.core.component.KoinComponent
+
+data class PluginAuthState(
+    val requiresAuth: Boolean = false,
+    val isLoggedIn: Boolean = false)
+
+data class PluginListItem(
+    val plugin: PluginEntry,
+    val isSelected: Boolean,
+    val authState: PluginAuthState,
+    val logoPath: Path?,
+    val isAuthInProgress: Boolean = false,
+    val isRemoving: Boolean = false,
+    val isBuiltIn: Boolean = false)
+
+data class AbilitySelection(
+    val ability: PluginAbility,
+    val plugins: List<PluginEntry>,
+    val selectedPlugin: PluginEntry?,
+    val pluginLogoPaths: Map<String, Path?> = emptyMap(),
+    /** Auth state of [selectedPlugin], so the row can offer Login / Logout right where it's used. */
+    val selectedAuthState: PluginAuthState = PluginAuthState(),
+    val isAuthInProgress: Boolean = false)
+
+data class PluginDiscoverState(
+    val repos: List<GitHubRepo> = emptyList(),
+    val currentPage: Int = 1,
+    val hasMore: Boolean = true,
+    val isLoading: Boolean = false,
+    val isLoadingMore: Boolean = false,
+    val error: String? = null,
+    val installingRepoId: Long? = null,
+    val isInitialLoaded: Boolean = false)
+
+sealed interface UrlError {
+    data object Empty : UrlError
+    data object InvalidScheme : UrlError
+    data object DownloadFailed : UrlError
+    data class Message(val message: String) : UrlError
+}
+
+sealed interface PluginUiState {
+    data object Loading : PluginUiState
+
+    data class Data(
+        val onboardingDiscover: Boolean = true,
+        val plugins: List<PluginListItem>,
+        val abilitySelections: List<AbilitySelection>,
+        val pendingPlugin: PluginManager.PendingPlugin? = null,
+        val pendingPluginLogoPath: Path? = null,
+        val urlInput: String = "",
+        val urlError: UrlError? = null,
+        val isLoadingUrl: Boolean = false,
+        val isPreparingFile: Boolean = false,
+        val isConfirmingInstall: Boolean = false,
+        val showInstallSheet: Boolean = false,
+        val showPluginInfo: PluginEntry? = null,
+        val pluginInfoLogoPath: Path? = null,
+        /** The cookie domains of [showPluginInfo], as the user should see them. */
+        val pluginInfoCookieDomains: List<String> = emptyList(),
+        /** False for built-in plugins, which can't be removed. */
+        val pluginInfoRemovable: Boolean = false,
+        val supportText: String? = null,
+        val isLoadingSupport: Boolean = false,
+        val installDialogRepo: GitHubRepo? = null,
+        val releases: List<GitHubRelease> = emptyList(),
+        val isLoadingReleases: Boolean = false,
+        val discover: PluginDiscoverState = PluginDiscoverState()) : PluginUiState
+}
+
+private data class PluginManagerSnapshot(
+    val state: PluginManagerStates,
+    val pendingPlugin: PluginManager.PendingPlugin?,
+    val metadataPlugins: List<PluginEntry>,
+    val audioPlugins: List<PluginEntry>,
+    val lyricsPlugins: List<PluginEntry>,
+    val scrobblePlugins: List<PluginEntry>,
+    val activeServices: Map<PluginAbility, PluginService?>?)
+
+private data class PluginScreenState(
+    val onboardingDiscover: Boolean = true,
+    val urlInput: String = "",
+    val urlError: UrlError? = null,
+    val isLoadingUrl: Boolean = false,
+    val isPreparingFile: Boolean = false,
+    val isConfirmingInstall: Boolean = false,
+    val authInProgressIds: Set<String> = emptySet(),
+    val removingIds: Set<String> = emptySet(),
+    val showInstallSheet: Boolean = false,
+    val showPluginInfo: PluginEntry? = null,
+    val pluginInfoLogoPath: Path? = null,
+    val supportText: String? = null,
+    val isLoadingSupport: Boolean = false,
+    val installDialogRepo: GitHubRepo? = null,
+    val releases: List<GitHubRelease> = emptyList(),
+    val isLoadingReleases: Boolean = false,
+    val discover: PluginDiscoverState = PluginDiscoverState())
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class PluginViewModel(
+    private val pluginManager: PluginManager,
+    private val webViewController: WebViewController,
+    httpClientFactory: HttpClientFactory) : ViewModel(), KoinComponent {
+
+    private val logger by injectLogger<PluginViewModel>()
+    private val gitHubRepo = GitHubPluginRepository(httpClientFactory.json)
+
+    private val _screenState = MutableStateFlow(PluginScreenState())
+    private val _allRepos = mutableListOf<GitHubRepo>()
+    private val _paginationInfo = PaginationInfo()
+
+    init {
+        viewModelScope.launch {
+            pluginManager.state.collect { pluginState ->
+                if (pluginState is PluginManagerStates.Data) {
+                    val installedUrls = pluginState.plugins
+                        .mapNotNull { it.repository.takeIf { r -> r.isNotBlank() } }
+                        .toSet()
+                    _screenState.update {
+                        it.copy(
+                            discover = it.discover.copy(
+                                repos = _allRepos.filter { repo -> repo.htmlUrl !in installedUrls }
+                            )
+                        )
+                    }
+                }
+            }
+        }
+        loadFirstDiscoverPage()
+    }
+
+    private class PaginationInfo(
+        var currentPage: Int = 1,
+        var hasMore: Boolean = true,
+        var totalCount: Int = 0)
+
+    @Suppress("UNCHECKED_CAST")
+    private val pluginManagerSnapshot: StateFlow<PluginManagerSnapshot> = combine(
+        pluginManager.state,
+        pluginManager.pendingPlugin,
+        pluginManager.metadataPlugins,
+        pluginManager.audioPlugins,
+        pluginManager.lyricsPlugins,
+        pluginManager.scrobblePlugins,
+        pluginManager.ziplineServices) { values ->
+        PluginManagerSnapshot(
+            state = values[0] as PluginManagerStates,
+            pendingPlugin = values[1] as PluginManager.PendingPlugin?,
+            metadataPlugins = values[2] as List<PluginEntry>,
+            audioPlugins = values[3] as List<PluginEntry>,
+            lyricsPlugins = values[4] as List<PluginEntry>,
+            scrobblePlugins = values[5] as List<PluginEntry>,
+            activeServices = values[6] as Map<PluginAbility, PluginService?>?)
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        PluginManagerSnapshot(
+            state = PluginManagerStates.Loading,
+            pendingPlugin = null,
+            metadataPlugins = emptyList(),
+            audioPlugins = emptyList(),
+            lyricsPlugins = emptyList(),
+            scrobblePlugins = emptyList(),
+            activeServices = null)
+    )
+
+    private val pluginLogoPaths: StateFlow<Map<String, Path?>> = pluginManager.state
+        .filterIsInstance<PluginManagerStates.Data>()
+        .map { state ->
+            state.plugins.associate { plugin ->
+                plugin.id to getLogoPath(plugin.id)
+            }
+        }
+        .distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
+
+    private val pluginAuthStates: StateFlow<Map<String, PluginAuthState>> = pluginManager.state
+        .filterIsInstance<PluginManagerStates.Data>()
+        .map { it.plugins }
+        .distinctUntilChanged()
+        .flatMapLatest { plugins ->
+            if (plugins.isEmpty()) return@flatMapLatest flowOf(emptyMap())
+            val entries = plugins.associate { plugin ->
+                plugin.id to pluginAuthFlow(plugin)
+            }
+            combine(entries.values.toList()) { states ->
+                entries.keys.zip(states).toMap()
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
+
+    val uiState: StateFlow<PluginUiState> = combine(
+        pluginManagerSnapshot,
+        _screenState,
+        pluginAuthStates,
+        pluginLogoPaths) { snapshot, screen, authStates, logoPaths ->
+        when (val state = snapshot.state) {
+            is PluginManagerStates.Loading -> PluginUiState.Loading
+            is PluginManagerStates.Data -> {
+                fun abilitySelection(ability: PluginAbility, plugins: List<PluginEntry>): AbilitySelection {
+                    val selected = state.selectedPlugins[ability]
+                    return AbilitySelection(
+                        ability = ability,
+                        plugins = plugins,
+                        selectedPlugin = selected,
+                        pluginLogoPaths = logoPaths,
+                        selectedAuthState = selected?.let { authStates[it.id] } ?: PluginAuthState(),
+                        isAuthInProgress = selected != null && selected.id in screen.authInProgressIds)
+                }
+                PluginUiState.Data(
+                onboardingDiscover = screen.onboardingDiscover,
+                plugins = state.plugins.map { plugin ->
+                    PluginListItem(
+                        plugin = plugin,
+                        isSelected = state.selectedPlugins.containsValue(plugin),
+                        authState = authStates[plugin.id] ?: PluginAuthState(),
+                        logoPath = logoPaths[plugin.id],
+                        isAuthInProgress = plugin.id in screen.authInProgressIds,
+                        isRemoving = plugin.id in screen.removingIds,
+                        isBuiltIn = plugin.isBuiltIn)
+                },
+                abilitySelections = listOf(
+                    abilitySelection(PluginAbility.METADATA, snapshot.metadataPlugins),
+                    abilitySelection(PluginAbility.AUDIO, snapshot.audioPlugins),
+                    abilitySelection(PluginAbility.LYRICS, snapshot.lyricsPlugins),
+                    abilitySelection(PluginAbility.SCROBBLE, snapshot.scrobblePlugins)),
+                pendingPlugin = snapshot.pendingPlugin,
+                pendingPluginLogoPath = snapshot.pendingPlugin?.entry?.id?.let { getLogoPath(it) },
+                urlInput = screen.urlInput,
+                urlError = screen.urlError,
+                isLoadingUrl = screen.isLoadingUrl,
+                isPreparingFile = screen.isPreparingFile,
+                isConfirmingInstall = screen.isConfirmingInstall,
+                showInstallSheet = screen.showInstallSheet,
+                showPluginInfo = screen.showPluginInfo,
+                pluginInfoLogoPath = screen.pluginInfoLogoPath,
+                pluginInfoCookieDomains = screen.showPluginInfo?.displayedCookieDomains.orEmpty(),
+                pluginInfoRemovable = screen.showPluginInfo?.let { !it.isBuiltIn } ?: false,
+                supportText = screen.supportText,
+                isLoadingSupport = screen.isLoadingSupport,
+                installDialogRepo = screen.installDialogRepo,
+                releases = screen.releases,
+                isLoadingReleases = screen.isLoadingReleases,
+                discover = screen.discover)
+            }
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), PluginUiState.Loading)
+
+    private fun pluginAuthFlow(plugin: PluginEntry): Flow<PluginAuthState> {
+        return combine(pluginManager.state, pluginManager.ziplineServices) { state, services ->
+            val data = state as? PluginManagerStates.Data
+            val ability = data?.selectedPlugins?.entries
+                ?.firstOrNull { (_, selected) -> selected.id == plugin.id }
+                ?.key
+            ability?.let { services?.get(it) }
+        }.distinctUntilChanged()
+            .flatMapLatest { service ->
+                if (service == null) return@flatMapLatest flowOf(PluginAuthState())
+                flow {
+                    val requiresAuth = try {
+                        service.use { coreAPI.requiresAuthentication }
+                    } catch (e: Exception) {
+                        if (e is CancellationException) throw e
+                        // Service may have been stopped/closed concurrently when the
+                        // plugin selection changed. Fall back to a default state and wait
+                        // for the next service emission.
+                        false
+                    }
+                    emit(PluginAuthState(requiresAuth = requiresAuth, isLoggedIn = false))
+                    if (requiresAuth) {
+                        service.loggedInFlow.collect { loggedIn ->
+                            emit(PluginAuthState(requiresAuth = true, isLoggedIn = loggedIn))
+                        }
+                    }
+                }
+            }
+    }
+
+    private fun getLogoPath(pluginId: String): Path? {
+        val path = pluginManager.pluginsDirPath / pluginId.toPath() / "logo.png".toPath()
+        return if (FileSystem.SYSTEM.exists(path)) path else null
+    }
+
+    private fun findAbilityForPlugin(pluginId: String): PluginAbility? {
+        val state = pluginManagerSnapshot.value.state as? PluginManagerStates.Data
+        return state?.selectedPlugins?.entries
+            ?.firstOrNull { (_, plugin) -> plugin.id == pluginId }
+            ?.key
+    }
+
+    private fun findServiceForPlugin(pluginId: String): PluginService? {
+        val ability = findAbilityForPlugin(pluginId) ?: return null
+        return pluginManagerSnapshot.value.activeServices?.get(ability)
+    }
+
+    fun onUrlInputChange(input: String) {
+        _screenState.update { it.copy(urlInput = input, urlError = null) }
+    }
+
+    fun submitUrl() {
+        val url = _screenState.value.urlInput.trim()
+        when {
+            url.isBlank() -> {
+                _screenState.update { it.copy(urlError = UrlError.Empty) }
+                return
+            }
+
+            !url.startsWith("http://") && !url.startsWith("https://") -> {
+                _screenState.update { it.copy(urlError = UrlError.InvalidScheme) }
+                return
+            }
+        }
+
+        _screenState.update { it.copy(urlError = null, isLoadingUrl = true) }
+        viewModelScope.launch {
+            runCatching {
+                pluginManager.addPluginFromURL(url)
+            }.onSuccess {
+                _screenState.update { it.copy(urlInput = "", isLoadingUrl = false) }
+            }.onFailure { e ->
+                logger.e(e) { "Failed to add plugin from URL" }
+                _screenState.update {
+                    it.copy(
+                        urlError = e.message?.let { message -> UrlError.Message(message) }
+                            ?: UrlError.DownloadFailed,
+                        isLoadingUrl = false)
+                }
+            }
+        }
+    }
+
+    fun onFileSelected(file: PlatformFile?) {
+        if (file == null || _screenState.value.isPreparingFile) return
+        _screenState.update { it.copy(isPreparingFile = true) }
+        viewModelScope.launch {
+            try {
+                runCatching {
+                    pluginManager.preparePlugin(file.readBytes())
+                }.onFailure { e ->
+                    if (e is CancellationException) throw e
+                    logger.e(e) { "Failed to prepare plugin from file" }
+                }
+            } finally {
+                _screenState.update { it.copy(isPreparingFile = false) }
+            }
+        }
+    }
+
+    fun showInstallSheet() {
+        _screenState.update { it.copy(showInstallSheet = true) }
+    }
+
+    fun dismissInstallSheet() {
+        _screenState.update { it.copy(showInstallSheet = false) }
+    }
+
+    private var supportJob: Job? = null
+
+    /** Opens the details sheet and loads the plugin's support text into its Support section. */
+    fun showPluginInfo(plugin: PluginEntry) {
+        supportJob?.cancel()
+        _screenState.update {
+            it.copy(
+                showPluginInfo = plugin,
+                pluginInfoLogoPath = getLogoPath(plugin.id),
+                supportText = null,
+                isLoadingSupport = true)
+        }
+        supportJob = viewModelScope.launch {
+            val text = try {
+                pluginManager.withPluginService(plugin) { coreAPI.supportMarkdownText(SemVer.parse(plugin.version)) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                logger.e(e) { "Failed to load support text for ${plugin.name}" }
+                null
+            }
+            _screenState.update {
+                if (it.showPluginInfo?.id != plugin.id) it
+                else it.copy(supportText = text, isLoadingSupport = false)
+            }
+        }
+    }
+
+    fun dismissPluginInfo() {
+        supportJob?.cancel()
+        supportJob = null
+        _screenState.update {
+            it.copy(
+                showPluginInfo = null,
+                pluginInfoLogoPath = null,
+                supportText = null,
+                isLoadingSupport = false)
+        }
+    }
+
+    fun showInstallDialog(repo: GitHubRepo) {
+        _screenState.update {
+            it.copy(
+                installDialogRepo = repo,
+                isLoadingReleases = true,
+                releases = emptyList())
+        }
+        viewModelScope.launch {
+            runCatching {
+                val parts = repo.fullName.split("/")
+                gitHubRepo.getReleases(parts[0], parts[1])
+            }.onSuccess { releases ->
+                _screenState.update { it.copy(releases = releases, isLoadingReleases = false) }
+            }.onFailure { e ->
+                logger.e(e) { "Failed to load releases" }
+                _screenState.update { it.copy(isLoadingReleases = false) }
+            }
+        }
+    }
+
+    fun dismissInstallDialog() {
+        _screenState.update { it.copy(installDialogRepo = null, releases = emptyList()) }
+    }
+
+    fun selectPlugin(ability: PluginAbility, plugin: PluginEntry?) {
+        pluginManager.setSelectedPlugin(ability, plugin)
+    }
+
+    fun showOnboardingDiscovery(show: Boolean) {
+        _screenState.update { it.copy(onboardingDiscover = show) }
+    }
+
+    /** Removes the plugin whose details are open, and closes them. */
+    fun removeShownPlugin() {
+        val plugin = _screenState.value.showPluginInfo ?: return
+        if (plugin.isBuiltIn) return
+        dismissPluginInfo()
+        removePlugin(plugin)
+    }
+
+    fun removePlugin(plugin: PluginEntry) {
+        if (plugin.id in _screenState.value.removingIds) return
+        _screenState.update { it.copy(removingIds = it.removingIds + plugin.id) }
+        viewModelScope.launch {
+            try {
+                runCatching {
+                    pluginManager.removePlugin(plugin)
+                }.onFailure { e ->
+                    if (e is CancellationException) throw e
+                    logger.e(e) { "Failed to remove plugin" }
+                }
+            } finally {
+                _screenState.update { it.copy(removingIds = it.removingIds - plugin.id) }
+            }
+        }
+    }
+
+    fun login(plugin: PluginEntry) {
+        if (plugin.id in _screenState.value.authInProgressIds) return
+        val service = findServiceForPlugin(plugin.id) ?: return
+        trackAuthTask(plugin.id, pluginManager.launchTask {
+            service.use { coreAPI.login() }
+        })
+    }
+
+    fun logout(plugin: PluginEntry) {
+        if (plugin.id in _screenState.value.authInProgressIds) return
+        val service = findServiceForPlugin(plugin.id) ?: return
+        val task = pluginManager.launchTask {
+            service.use { coreAPI.logout() }
+        }
+        trackAuthTask(plugin.id, task) {
+            webViewController.clearData(plugin.id)
+        }
+    }
+
+    /**
+     * Marks [pluginId] busy until [task] (running in the plugin manager's scope, so it outlives this
+     * screen) and the optional [alongside] work finish, whatever their outcome.
+     */
+    private fun trackAuthTask(pluginId: String, task: Job, alongside: suspend () -> Unit = {}) {
+        _screenState.update { it.copy(authInProgressIds = it.authInProgressIds + pluginId) }
+        viewModelScope.launch {
+            try {
+                alongside()
+                task.join()
+            } finally {
+                _screenState.update { it.copy(authInProgressIds = it.authInProgressIds - pluginId) }
+            }
+        }
+    }
+
+    fun confirmInstall() {
+        if (_screenState.value.isConfirmingInstall) return
+        val task = pluginManager.confirmInstall() ?: return
+        _screenState.update { it.copy(isConfirmingInstall = true) }
+        viewModelScope.launch {
+            try {
+                task.join()
+            } finally {
+                _screenState.update { it.copy(isConfirmingInstall = false) }
+            }
+        }
+    }
+
+    fun dismissInstall() {
+        pluginManager.dismissInstall()
+    }
+
+    private fun filterInstalledRepos(repos: List<GitHubRepo>): List<GitHubRepo> {
+        val pluginState = pluginManager.state.value
+        if (pluginState !is PluginManagerStates.Data) return repos
+        val installedUrls = pluginState.plugins
+            .mapNotNull { it.repository.takeIf { r -> r.isNotBlank() } }
+            .toSet()
+        return repos.filter { it.htmlUrl !in installedUrls }
+    }
+
+    fun retryDiscovery() {
+        if (_screenState.value.discover.isLoading) return
+        loadFirstDiscoverPage()
+    }
+
+    private fun loadFirstDiscoverPage() {
+        viewModelScope.launch {
+            _screenState.update {
+                it.copy(discover = it.discover.copy(isLoading = true, error = null))
+            }
+            runCatching {
+                gitHubRepo.searchPlugins(page = 1)
+            }.onSuccess { response ->
+                _allRepos.clear()
+                _allRepos.addAll(response.items)
+                _paginationInfo.currentPage = 1
+                _paginationInfo.totalCount = response.totalCount
+                _paginationInfo.hasMore = _allRepos.size < response.totalCount
+                _screenState.update {
+                    it.copy(
+                        discover = it.discover.copy(
+                            repos = filterInstalledRepos(response.items),
+                            currentPage = 1,
+                            hasMore = _paginationInfo.hasMore,
+                            isLoading = false,
+                            isInitialLoaded = true)
+                    )
+                }
+            }.onFailure { e ->
+                logger.e(e) { "Failed to load plugins" }
+                _screenState.update {
+                    it.copy(
+                        discover = it.discover.copy(
+                            isLoading = false,
+                            error = e.message,
+                            isInitialLoaded = true)
+                    )
+                }
+            }
+        }
+    }
+
+    fun loadNextDiscoverPage() {
+        val current = _screenState.value.discover
+        if (current.isLoadingMore || !current.hasMore) return
+        viewModelScope.launch {
+            val nextPage = _paginationInfo.currentPage + 1
+            _screenState.update {
+                it.copy(discover = it.discover.copy(isLoadingMore = true, error = null))
+            }
+            runCatching {
+                gitHubRepo.searchPlugins(page = nextPage)
+            }.onSuccess { response ->
+                _allRepos.addAll(response.items)
+                _paginationInfo.currentPage = nextPage
+                _paginationInfo.hasMore = _allRepos.size < response.totalCount
+                _screenState.update {
+                    it.copy(
+                        discover = it.discover.copy(
+                            repos = filterInstalledRepos(_allRepos),
+                            currentPage = nextPage,
+                            hasMore = _paginationInfo.hasMore,
+                            isLoadingMore = false)
+                    )
+                }
+            }.onFailure { e ->
+                logger.e(e) { "Failed to load more plugins" }
+                _screenState.update {
+                    it.copy(
+                        discover = it.discover.copy(
+                            isLoadingMore = false,
+                            error = e.message)
+                    )
+                }
+            }
+        }
+    }
+
+    fun installPlugin(release: GitHubRelease, repoId: Long) {
+        val smplugUrl =
+            release.assets.firstOrNull { it.name.endsWith(".smplug") }?.browserDownloadUrl
+        if (smplugUrl != null) {
+            installPluginFromUrl(smplugUrl, repoId)
+        }
+    }
+
+    private fun installPluginFromUrl(url: String, repoId: Long) {
+        if (_screenState.value.discover.installingRepoId != null) return
+        _screenState.update {
+            it.copy(discover = it.discover.copy(installingRepoId = repoId, error = null))
+        }
+        viewModelScope.launch {
+            runCatching {
+                pluginManager.addPluginFromURL(url)
+            }.onFailure { e ->
+                logger.e(e) { "Failed to install plugin" }
+                _screenState.update {
+                    it.copy(discover = it.discover.copy(error = e.message))
+                }
+            }
+            _screenState.update {
+                it.copy(discover = it.discover.copy(installingRepoId = null))
+            }
+        }
+    }
+
+}

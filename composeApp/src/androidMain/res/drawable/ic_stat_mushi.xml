@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Notification icon: the Mushi mark in white, enlarged to fill the small canvas. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="1024"
+    android:viewportHeight="1024">
+    <group
+        android:scaleX="1.6"
+        android:scaleY="1.6"
+        android:translateX="-307.2"
+        android:translateY="-307.2">
+        <path
+            android:fillColor="#00000000"
+            android:pathData="M300,740V520A106,106 0 0,1 512,520V740M512,520A106,106 0 0,1 724,520V740"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:strokeWidth="72" />
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M464,300a48,48 0 1,0 96,0a48,48 0 1,0 -96,0z" />
+    </group>
+</vector>

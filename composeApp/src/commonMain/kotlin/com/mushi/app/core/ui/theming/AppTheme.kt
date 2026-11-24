@@ -1,0 +1,294 @@
+package com.mushi.app.core.ui.theming
+
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+import com.mushi.app.modules.settings.Theme
+import com.mushi.app.modules.settings.UserSettings
+import org.spotube.millennium.composables.MillenniumModalBottomSheetTheme
+import org.spotube.millennium.composables.MillenniumTooltipHost
+import org.spotube.millennium.composables.MillenniumTopAppBarTheme
+import org.spotube.millennium.composables.MillenniumTopAppBarThemeProperties
+import org.spotube.millennium.composables.defaultMillenniumModalBottomSheetTheme
+import org.spotube.millennium.composables.defaultMillenniumTopAppBarTheme
+import org.spotube.millennium.theme.MillenniumColors
+import org.spotube.millennium.theme.MillenniumDarkThemeComponents
+import org.spotube.millennium.theme.MillenniumLightThemeComponents
+import org.spotube.millennium.theme.MillenniumPalette
+import org.spotube.millennium.theme.MillenniumTheme
+import org.spotube.millennium.theme.MillenniumThemeConfig
+
+/**
+ * Semantic color roles used across the app, resolved from the active Millennium palette.
+ *
+ * This is not a second palette: every role is derived from [MillenniumColors], so the
+ * whole app follows the selected Millennium accent family and light/dark appearance.
+ */
+@Immutable
+data class AppColors(
+    val primary: Color,
+    val onPrimary: Color,
+    val primaryContainer: Color,
+    val onPrimaryContainer: Color,
+    val secondary: Color,
+    val onSecondary: Color,
+    val secondaryContainer: Color,
+    val onSecondaryContainer: Color,
+    val tertiaryContainer: Color,
+    val onTertiaryContainer: Color,
+    val background: Color,
+    val onBackground: Color,
+    val surface: Color,
+    val onSurface: Color,
+    val surfaceVariant: Color,
+    val onSurfaceVariant: Color,
+    val surfaceContainer: Color,
+    val surfaceContainerHigh: Color,
+    val surfaceContainerHighest: Color,
+    val inverseSurface: Color,
+    val inverseOnSurface: Color,
+    val outline: Color,
+    val outlineVariant: Color,
+    val error: Color,
+    val onError: Color,
+    val errorContainer: Color,
+    val onErrorContainer: Color,
+    val scrim: Color
+)
+
+/** Maps Millennium's semantic palette onto the app's role names. */
+fun appColorsFrom(m: MillenniumColors): AppColors = AppColors(
+    primary = m.accent,
+    onPrimary = m.onAccent,
+    primaryContainer = m.raised,
+    onPrimaryContainer = m.text,
+    secondary = m.accent,
+    onSecondary = m.onAccent,
+    secondaryContainer = m.raised,
+    onSecondaryContainer = m.text,
+    tertiaryContainer = m.raised,
+    onTertiaryContainer = m.text,
+    background = m.background,
+    onBackground = m.text,
+    surface = m.surface,
+    onSurface = m.text,
+    surfaceVariant = m.inset,
+    onSurfaceVariant = m.muted,
+    surfaceContainer = m.surface,
+    surfaceContainerHigh = m.raised,
+    surfaceContainerHighest = m.raised,
+    inverseSurface = m.text,
+    inverseOnSurface = m.background,
+    outline = m.border,
+    outlineVariant = m.border,
+    error = m.danger,
+    onError = m.background,
+    errorContainer = m.danger.copy(alpha = 0.16f),
+    onErrorContainer = m.danger,
+    scrim = m.scrim
+)
+
+/*
+ * Colour comes from the Mushi palette the user picked (see MushiPalettes.kt). Millennium's own
+ * palette slots (Blue, Orange, Lime) all resolve to that one palette, so the library's palette
+ * setting has no effect and every component follows the Mushi palette.
+ */
+private fun mushiColorSchemes(spec: MushiPaletteSpec) = org.spotube.millennium.theme.MillenniumColorSchemes(
+    light = spec.light,
+    dark = spec.dark,
+    orangeLight = spec.light,
+    orangeDark = spec.dark,
+    limeLight = spec.light,
+    limeDark = spec.dark)
+
+/** Named text styles used by the app, independent of Material typography. */
+@Immutable
+data class AppTypography(
+    val displaySmall: TextStyle,
+    val headlineLarge: TextStyle,
+    val headlineMedium: TextStyle,
+    val headlineSmall: TextStyle,
+    val titleLarge: TextStyle,
+    val titleMedium: TextStyle,
+    val titleSmall: TextStyle,
+    val bodyLarge: TextStyle,
+    val bodyMedium: TextStyle,
+    val bodySmall: TextStyle,
+    val labelLarge: TextStyle,
+    val labelMedium: TextStyle,
+    val labelSmall: TextStyle
+)
+
+private fun style(
+    size: Int,
+    lineHeight: Int,
+    weight: FontWeight = FontWeight.Normal,
+    family: FontFamily = FontFamily.SansSerif
+): TextStyle = TextStyle(
+    fontFamily = family,
+    fontSize = size.sp,
+    lineHeight = lineHeight.sp,
+    fontWeight = weight
+)
+
+/**
+ * A tighter, bolder scale: big bold page titles and section headings, then quiet body text.
+ * Page and display titles use ExtraBold, which Plus Jakarta Sans draws with character.
+ */
+fun appTypography(family: FontFamily) = AppTypography(
+    displaySmall = style(34, 41, FontWeight.ExtraBold, family),
+    headlineLarge = style(34, 41, FontWeight.ExtraBold, family),
+    headlineMedium = style(28, 34, FontWeight.Bold, family),
+    headlineSmall = style(24, 30, FontWeight.SemiBold, family),
+    titleLarge = style(22, 28, FontWeight.Bold, family),
+    titleMedium = style(17, 22, FontWeight.SemiBold, family),
+    titleSmall = style(15, 20, FontWeight.SemiBold, family),
+    bodyLarge = style(17, 22, family = family),
+    bodyMedium = style(15, 20, family = family),
+    bodySmall = style(13, 18, family = family),
+    labelLarge = style(15, 20, FontWeight.SemiBold, family),
+    labelMedium = style(13, 16, FontWeight.Medium, family),
+    labelSmall = style(11, 14, FontWeight.Medium, family)
+)
+
+/** The scale in the platform's sans-serif, for previews and anything outside [MushiTheme]. */
+val AppDefaultTypography = appTypography(FontFamily.SansSerif)
+
+/** Corner shapes used by the app. */
+@Immutable
+data class AppShapes(
+    val small: Shape,
+    val medium: Shape,
+    val large: Shape
+)
+
+val AppDefaultShapes = AppShapes(
+    small = RoundedCornerShape(8.dp),
+    medium = RoundedCornerShape(12.dp),
+    large = RoundedCornerShape(16.dp)
+)
+
+val LocalAppColors =
+    staticCompositionLocalOf { appColorsFrom(org.spotube.millennium.theme.MillenniumLightColors) }
+val LocalAppTypography = staticCompositionLocalOf { AppDefaultTypography }
+val LocalAppShapes = staticCompositionLocalOf { AppDefaultShapes }
+
+/** Reads the active app theme tokens, all backed by Millennium. */
+object AppTheme {
+    val colors: AppColors @Composable get() = LocalAppColors.current
+    val typography: AppTypography @Composable get() = LocalAppTypography.current
+    val shapes: AppShapes @Composable get() = LocalAppShapes.current
+}
+
+/**
+ * The app's single source of truth for colour.
+ *
+ * Installs [MillenniumTheme] with the user's [UserSettings.colorPalette] and light/dark
+ * [UserSettings.theme], then derives the app's semantic [AppColors], [AppTypography] and
+ * [AppShapes] tokens from the active Millennium theme, and the brand gradient ([LocalMushiBrand]).
+ */
+@Composable
+fun MushiTheme(
+    settings: UserSettings,
+    content: @Composable () -> Unit
+) {
+    val isDarkTheme = when (settings.theme) {
+        Theme.LIGHT -> false
+        Theme.DARK -> true
+        Theme.SYSTEM -> isSystemDarkTheme()
+    }
+    val palette: MillenniumPalette = settings.palette
+    val spec = settings.colorPalette.spec()
+    val colorSchemes = remember(spec) { mushiColorSchemes(spec) }
+
+    val darkTheme = MillenniumDarkThemeComponents
+    val lightTheme = MillenniumLightThemeComponents
+    val fontFamily = rememberMushiFontFamily()
+    val typography = remember(fontFamily) { appTypography(fontFamily) }
+
+    MillenniumTheme(
+        dark = isDarkTheme,
+        config = MillenniumThemeConfig(
+            colorSchemes = colorSchemes,
+            palette = palette,
+            // Every component gets the flat Mushi look (see MushiComponentTheme.kt).
+            dark = flatComponents(
+                darkTheme.copy(
+                    topAppBarTheme = MillenniumTopAppBarTheme(
+                        properties = darkTheme.topAppBarTheme.properties.copy(
+                            separatorColor = Color.Transparent,
+                            // Blend into the page instead of a tinted band.
+                            background = androidx.compose.ui.graphics.SolidColor(Color.Transparent)
+                        )
+                    ),
+                    modalBottomSheetTheme = compactModalBottomSheetTheme()
+                ),
+                spec.dark,
+                typography),
+            light = flatComponents(
+                lightTheme.copy(
+                    topAppBarTheme = MillenniumTopAppBarTheme(
+                        properties = lightTheme.topAppBarTheme.properties.copy(
+                            separatorColor = Color.Transparent,
+                            // Blend into the page instead of a tinted band.
+                            background = androidx.compose.ui.graphics.SolidColor(Color.Transparent)
+                        )
+                    ),
+                    modalBottomSheetTheme = compactModalBottomSheetTheme()
+                ),
+                spec.light,
+                typography)
+        )
+    ) {
+        val colors = appColorsFrom(MillenniumTheme.colors)
+        val brand = remember(settings.colorPalette, colors.primary) {
+            MushiBrand(settings.colorPalette, spec.gradient, colors.primary)
+        }
+        MillenniumTooltipHost {
+            CompositionLocalProvider(
+                LocalAppColors provides colors,
+                LocalMushiBrand provides brand,
+                com.mushi.app.core.ui.LocalReduceMotion provides com.mushi.app.core.ui.rememberSystemReduceMotion(),
+                LocalAppTypography provides typography,
+                // Text without an explicit style also gets the Mushi typeface.
+                com.composeunstyled.LocalTextStyle provides com.composeunstyled.LocalTextStyle.current.copy(fontFamily = fontFamily),
+                LocalAppShapes provides AppDefaultShapes,
+                content = content
+            )
+        }
+    }
+}
+
+/** Library default is 24dp padding + 16dp spacing, which is far too roomy on phones. */
+private fun compactModalBottomSheetTheme(): MillenniumModalBottomSheetTheme {
+    val padding = PaddingValues(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 8.dp)
+    fun org.spotube.millennium.composables.MillenniumModalBottomSheetThemeProperties.compact() =
+        copy(contentPadding = padding, contentSpacing = 8.dp)
+    val states = defaultMillenniumModalBottomSheetTheme().states
+    return MillenniumModalBottomSheetTheme(
+        states = org.spotube.millennium.theme.MillenniumControlStateProperty(
+            default = states.default.compact(),
+            hovered = states.hovered.compact(),
+            focused = states.focused.compact(),
+            pressed = states.pressed.compact(),
+            disabled = states.disabled.compact(),
+            selected = states.selected.compact(),
+            error = states.error.compact()))
+}
+
+/** Whether the active Millennium appearance is light. */
+@Composable
+fun isLightAppearance(): Boolean = MillenniumTheme.colors.background.luminance() > 0.5f

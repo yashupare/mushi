@@ -1,0 +1,21 @@
+Mushi
+Copyright (C) 2026 yashupare and Mushi Contributors
+
+This product is a modified version of Spotube
+(https://github.com/KRTirtho/spotube),
+Copyright (C) 2026 Kingkor Roy Tirtho and Spotube Contributors.
+
+The Mushi contributors hold the copyright to their own changes and to the files they added:
+among others the Mushi name and logo, the colour palettes, the launch animation, the redesign
+and motion work, and the Group Jam server configuration. The original Spotube code remains the
+copyright of its authors.
+
+The whole work is licensed under the GNU Affero General Public License, version 3 or (at your
+option) any later version; see LICENSE. If you distribute Mushi, or run a modified version for
+others over a network, you must offer them its complete corresponding source code.
+
+Third-party components keep their own licences, including:
+- Plus Jakarta Sans font: SIL Open Font License 1.1
+  (composeApp/src/commonMain/composeResources/files/licenses/plus_jakarta_sans_OFL.txt).
+- Libraries resolved by Gradle (AndroidX, Compose Multiplatform, Kotlin, Media3, Coil, Koin,
+  Haze and others): each under its own licence, as published with that library.

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Mushi logo A, "listening m": two arches, a dot and two sound waves, drawn on a 100-unit
+     grid (same as the PNG generator) and scaled into the adaptive icon's safe zone. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="0.8"
+        android:scaleY="0.8"
+        android:translateX="14.0"
+        android:translateY="18.28">
+            <group android:pivotX="50" android:pivotY="29">
+                <path android:pathData="M32,22A26,26 0 0,1 68,22" android:fillColor="#00000000" android:strokeColor="#FFFF4D6D"
+                    android:strokeAlpha="0.55" android:strokeWidth="3" android:strokeLineCap="round" />
+            </group>
+            <group android:pivotX="50" android:pivotY="29">
+                <path android:pathData="M39,25A15,15 0 0,1 61,25" android:fillColor="#00000000" android:strokeColor="#FFFF4D6D"
+                    android:strokeAlpha="0.55" android:strokeWidth="3" android:strokeLineCap="round" />
+            </group>
+            <path android:pathData="M29,72V52A10.5,10.5 0 0,1 50,52V72" android:fillColor="#00000000"
+                android:strokeWidth="8" android:strokeLineCap="round" android:strokeLineJoin="round">
+                <aapt:attr name="android:strokeColor">
+                    <gradient
+                        android:type="linear"
+                        android:startX="25" android:startY="13"
+                        android:endX="75" android:endY="76">
+                        <item android:offset="0" android:color="#FFFF8A5B" />
+                        <item android:offset="0.55" android:color="#FFFF4D6D" />
+                        <item android:offset="1" android:color="#FFD6336C" />
+                    </gradient>
+                </aapt:attr>
+            </path>
+            <path android:pathData="M50,52A10.5,10.5 0 0,1 71,52V72" android:fillColor="#00000000"
+                android:strokeWidth="8" android:strokeLineCap="round" android:strokeLineJoin="round">
+                <aapt:attr name="android:strokeColor">
+                    <gradient
+                        android:type="linear"
+                        android:startX="25" android:startY="13"
+                        android:endX="75" android:endY="76">
+                        <item android:offset="0" android:color="#FFFF8A5B" />
+                        <item android:offset="0.55" android:color="#FFFF4D6D" />
+                        <item android:offset="1" android:color="#FFD6336C" />
+                    </gradient>
+                </aapt:attr>
+            </path>
+            <group android:pivotX="50" android:pivotY="29">
+                <path android:pathData="M45,29a5,5 0 1,0 10,0a5,5 0 1,0 -10,0z">
+                    <aapt:attr name="android:fillColor">
+                    <gradient
+                        android:type="linear"
+                        android:startX="25" android:startY="13"
+                        android:endX="75" android:endY="76">
+                        <item android:offset="0" android:color="#FFFF8A5B" />
+                        <item android:offset="0.55" android:color="#FFFF4D6D" />
+                        <item android:offset="1" android:color="#FFD6336C" />
+                    </gradient>
+                </aapt:attr>
+                </path>
+            </group>
+    </group>
+</vector>

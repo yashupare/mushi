@@ -171,6 +171,25 @@ actual class AudioPlayer actual constructor(context: Any) : AudioPlayerInterface
 
     internal val player: ExoPlayer get() = exoPlayer
 
+    /** The app icon (background glow + logo) rendered as a 512 px PNG cover, built once. */
+    private val fallbackArtwork: ByteArray by lazy {
+        val size = 512
+        val bitmap = android.graphics.Bitmap.createBitmap(size, size, android.graphics.Bitmap.Config.ARGB_8888)
+        val canvas = android.graphics.Canvas(bitmap)
+        listOf(com.mushi.app.R.drawable.mushi_icon_background, com.mushi.app.R.drawable.mushi_icon_foreground)
+            .forEach { id ->
+                androidx.core.content.ContextCompat.getDrawable(appContext, id)?.apply {
+                    setBounds(0, 0, size, size)
+                    draw(canvas)
+                }
+            }
+        java.io.ByteArrayOutputStream().use { out ->
+            bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out)
+            bitmap.recycle()
+            out.toByteArray()
+        }
+    }
+
     private fun MediaItem.toExoMediaItem(): androidx.media3.common.MediaItem {
         return androidx.media3.common.MediaItem.Builder()
             .setMediaId(url)
@@ -185,6 +204,10 @@ actual class AudioPlayer actual constructor(context: Any) : AudioPlayerInterface
                             setArtworkData(coverBytes, MediaMetadata.PICTURE_TYPE_FRONT_COVER)
                         } else if (coverURL.isNotBlank()) {
                             setArtworkUri(android.net.Uri.parse(coverURL))
+                        } else {
+                            // No cover: the lock screen and notification show the Mushi cover
+                            // instead of a blank grey card.
+                            setArtworkData(fallbackArtwork, MediaMetadata.PICTURE_TYPE_FRONT_COVER)
                         }
                     }
                     .build()

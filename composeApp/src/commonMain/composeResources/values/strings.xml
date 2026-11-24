@@ -516,6 +516,10 @@
     <string name="player_play_content_description">Play</string>
     <string name="player_pause_content_description">Pause</string>
     <string name="player_nothing_playing">Nothing playing</string>
+    <string name="media_control_like">Like</string>
+    <string name="media_control_unlike">Remove from Liked</string>
+    <string name="media_control_shuffle_on">Shuffle</string>
+    <string name="media_control_shuffle_off">Turn off shuffle</string>
     <string name="player_add_to_queue_content_description">Add to queue</string>
 
     <string name="update_action_ignore">Ignore</string>

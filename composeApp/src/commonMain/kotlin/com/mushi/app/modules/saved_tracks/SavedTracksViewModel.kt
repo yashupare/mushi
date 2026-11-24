@@ -2,6 +2,7 @@ package com.mushi.app.modules.saved_tracks
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -372,8 +373,11 @@ fun rememberIsSavedTracks(
     repository: SavedTracksRepository = koinInject()): SavedState<List<Boolean>> {
     val scope = rememberCoroutineScope()
     var state by remember { mutableStateOf<SavedState<List<Boolean>>>(SavedState.Loading) }
+    // Re-checked when the library changes, so a like or unlike made elsewhere (another screen,
+    // the lock screen) doesn't leave a stale answer behind.
+    val libraryChanges by repository.libraryChanges.collectAsState()
 
-    LaunchedEffect(trackIds) {
+    LaunchedEffect(trackIds, libraryChanges) {
         scope.launch {
             state = SavedState.Loading
             runCatching {

@@ -6,6 +6,9 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
+import android.os.Bundle
+import androidx.media3.session.SessionResult
+import com.mushi.app.modules.saved_tracks.SavedTracksRepository
 import android.os.Process
 import android.util.Log
 import androidx.annotation.OptIn
@@ -52,6 +55,8 @@ class PlaybackService : MediaLibraryService(), KoinComponent {
     private val audioPlayerQueue: AudioPlayerQueue by inject()
     private val mediaBrowseHelper: MediaBrowseHelper by inject()
     private lateinit var librarySession: MediaLibrarySession
+    private val savedTracks: SavedTracksRepository by inject()
+    private lateinit var lockScreenControls: LockScreenControls
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -106,6 +111,10 @@ class PlaybackService : MediaLibraryService(), KoinComponent {
                 .build()
 
         addSession(librarySession)
+
+        lockScreenControls = LockScreenControls(
+            librarySession, audioPlayer, audioPlayerQueue, savedTracks, serviceScope)
+            .also { it.start() }
 
         Log.i(TAG, "Library session created")
     }
@@ -171,6 +180,8 @@ class PlaybackService : MediaLibraryService(), KoinComponent {
                 .add(SessionCommand.COMMAND_CODE_LIBRARY_GET_LIBRARY_ROOT)
                 .add(SessionCommand.COMMAND_CODE_LIBRARY_SUBSCRIBE)
                 .add(SessionCommand.COMMAND_CODE_LIBRARY_UNSUBSCRIBE)
+                .add(LockScreenControls.LIKE)
+                .add(LockScreenControls.SHUFFLE)
                 .build()
 
             val playerCommands = Player.Commands.Builder()
@@ -182,6 +193,18 @@ class PlaybackService : MediaLibraryService(), KoinComponent {
                 playerCommands
             )
         }
+
+        override fun onCustomCommand(
+            session: MediaSession,
+            controller: MediaSession.ControllerInfo,
+            customCommand: SessionCommand,
+            args: Bundle
+        ): ListenableFuture<SessionResult> =
+            if (lockScreenControls.handle(customCommand)) {
+                Futures.immediateFuture(LockScreenControls.SUCCESS)
+            } else {
+                super.onCustomCommand(session, controller, customCommand, args)
+            }
 
         override fun onGetLibraryRoot(
             session: MediaLibrarySession,

@@ -11,6 +11,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -134,12 +137,13 @@ fun AppShell(
     Box(modifier = Modifier.fillMaxSize()) {
         val useSidebar = viewModel.useSidebar()
         val chromeUiState by viewModel.compactChromeUiState.collectAsState()
+        val hasPlayerContent by viewModel.hasPlayerContent.collectAsState()
         val density = LocalDensity.current
         val navigationBarInset = with(density) {
             WindowInsets.navigationBars.getBottom(this).toDp()
         }
-        val bottomOverlayInset =
-            viewModel.bottomOverlayInset(useSidebar, navigationBarInset, chromeUiState)
+        val bottomOverlayInset = viewModel.bottomOverlayInset(
+            useSidebar, navigationBarInset, chromeUiState, hasPlayerContent)
 
         CompositionLocalProvider(LocalAppShellBottomInset provides bottomOverlayInset) {
             if (useSidebar) {
@@ -169,12 +173,27 @@ fun AppShell(
                                 content()
                             }
                         }
-                        AppLargePlayer(
-                            hazeState = hazeState,
-                            modifier = Modifier.fillMaxWidth(),
-                            onQueue = queueViewModel::toggleQueueVisibility,
-                            onAlternativeSource = alternativeViewModel::toggleAlternativeVisibility,
-                            onLyrics = { navigatorCommands.navigateTo(Routes.Lyrics) })
+                        // Hidden while nothing is queued; slides up when playback starts.
+                        AnimatedVisibility(
+                            visible = hasPlayerContent,
+                            enter = expandVertically(
+                                animationSpec = com.mushi.app.core.ui.motionOrSnap(
+                                    com.mushi.app.core.ui.MushiMotion.spatialDefault()),
+                                expandFrom = Alignment.Top
+                            ) + fadeIn(com.mushi.app.core.ui.MushiMotion.effectsDefault()),
+                            exit = shrinkVertically(
+                                animationSpec = com.mushi.app.core.ui.motionOrSnap(
+                                    com.mushi.app.core.ui.MushiMotion.spatialDefault()),
+                                shrinkTowards = Alignment.Top
+                            ) + fadeOut(com.mushi.app.core.ui.MushiMotion.effectsFast())
+                        ) {
+                            AppLargePlayer(
+                                hazeState = hazeState,
+                                modifier = Modifier.fillMaxWidth(),
+                                onQueue = queueViewModel::toggleQueueVisibility,
+                                onAlternativeSource = alternativeViewModel::toggleAlternativeVisibility,
+                                onLyrics = { navigatorCommands.navigateTo(Routes.Lyrics) })
+                        }
                     }
 
                     if (isQueueVisible) {
@@ -373,6 +392,21 @@ internal fun CompactPlayerOverlay(
     var expandedPlayerComposed by remember { mutableStateOf(false) }
     if (expandedPlayerVisible) expandedPlayerComposed = true
 
+    // Nothing queued: the mini player slides down behind the bottom bar and leaves layout,
+    // so pages reach the tab bar. It slides back up when playback starts.
+    val hasPlayerContent by viewModel.hasPlayerContent.collectAsState()
+    val playerReveal = animateFloatAsState(
+        targetValue = if (hasPlayerContent) 1f else 0f,
+        animationSpec = com.mushi.app.core.ui.motionOrSnap(com.mushi.app.core.ui.MushiMotion.spatialDefault()),
+        label = "miniPlayerReveal")
+    val sheetShown by remember { derivedStateOf { hasPlayerContent || playerReveal.value > 0.01f } }
+    // Clearing the queue from the full player collapses it before the mini player hides.
+    LaunchedEffect(hasPlayerContent, sheetState) {
+        if (!hasPlayerContent && sheetState.currentDetent != partialDetent) {
+            sheetState.animateTo(partialDetent)
+        }
+    }
+
     CompositionLocalProvider(LocalPlayerTransition provides { progress }) {
     Box(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -381,7 +415,14 @@ internal fun CompactPlayerOverlay(
 
         UnstyledBottomSheet(
             state = sheetState,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .zeroSizeUnless(sheetShown)
+                .graphicsLayer {
+                    val reveal = playerReveal.value
+                    translationY = (1f - reveal) * floatingPlayerHeightPx
+                    alpha = reveal
+                }
         ) {
             Sheet(modifier = Modifier.fillMaxSize()) {
                 Box(modifier = Modifier.fillMaxSize()) {

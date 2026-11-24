@@ -100,7 +100,7 @@ val sharedModules = module {
     singleOf(::WebViewController)
 
     // Shell
-    viewModelOf(::AppShellViewModel)
+    viewModel { AppShellViewModel(get()) }
     viewModelOf(::PlayerOptionsViewModel)
     viewModelOf(::PlayerQueueContentViewModel)
     viewModelOf(::AlternativeTrackContentViewModel)

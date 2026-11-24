@@ -81,9 +81,9 @@
 - No committed `*Test*.kt` files; test tasks may run zero tests unless new tests are added.
 
 ## Releases and packaging
-- Git is used locally only: there are no CI or release workflows, and nothing is pushed or published.
+- Published at github.com/yashupare/mushi. No CI: build `:composeApp:assembleStableRelease` locally (signed with the release key from `composeApp/local.properties`), bump `version` and `buildNumber` in `composeApp/build.gradle.kts`, tag `vX.Y.Z` and attach the APK to a GitHub release. The in-app update check reads those releases.
 - Spotube's store packaging (AUR, Flatpak, WinGet, Chocolatey, Homebrew) was removed in the rebrand. `packaging/linux` (desktop entry + AppStream metainfo, `com.mushi.app`) remains; `:composeApp:renderPackagingLinux` renders it, and `packaging/package-linux-tarball.sh` packs `mushi-linux-<version>-<arch>.tar.xz` from the GraalVM distributable.
-- `mushi.repositoryUrl`, `mushi.homePageUrl` and `mushi.maintainer` Gradle properties feed the update check and package metadata; all blank by default (update check off).
+- `mushi.repositoryUrl`, `mushi.homePageUrl` and `mushi.maintainer` Gradle properties feed the update check and package metadata. `mushi.repositoryUrl` is set in `gradle.properties`; the update dialog is gated by `AppEdition.APP_UPDATES_ENABLED`.
 - Desktop installers: `packageGraalvm{Deb,Rpm,Exe,Dmg}`, output in `composeApp/build/compose/binaries/main/graalvm-<format>/`. macOS builds are Apple-silicon only (`Mushi-macos-apple-silicon.dmg`).
 
 ## OpenCode Agent MCP Execution Directives

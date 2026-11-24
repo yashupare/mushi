@@ -7,9 +7,14 @@ import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
+import com.mushi.app.core.audioplayer.AudioPlayerQueue
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlin.math.min
 
@@ -27,7 +32,18 @@ data class LyricsOverlayState(
 
 data class CompactChromeUiState(val measuredBottomBarHeight: Dp? = null)
 
-class AppShellViewModel : ViewModel() {
+/**
+ * @param audioPlayerQueue hides the mini player while nothing is queued. Without one (tests),
+ *   the player is always shown.
+ */
+class AppShellViewModel(audioPlayerQueue: AudioPlayerQueue? = null) : ViewModel() {
+    /** False while the queue is empty: the mini player and its bottom inset are hidden then. */
+    val hasPlayerContent: StateFlow<Boolean> =
+        audioPlayerQueue?.queueFlow
+            ?.map { it.isNotEmpty() }
+            ?.stateIn(viewModelScope, SharingStarted.Eagerly, audioPlayerQueue.queueFlow.value.isNotEmpty())
+            ?: MutableStateFlow(true)
+
     val sidebarMinWidth = 840.dp
     val bottomBarHeight = 80.dp
     // The background bleed overlaps the bottom bar and is not part of the peek height.
@@ -57,11 +73,12 @@ class AppShellViewModel : ViewModel() {
     fun bottomOverlayInset(
         useSidebar: Boolean,
         navigationBarInset: Dp,
-        chrome: CompactChromeUiState
+        chrome: CompactChromeUiState,
+        hasPlayerContent: Boolean = true
     ): Dp =
-        if (useSidebar) largePlayerInset + navigationBarInset
+        if (useSidebar) (if (hasPlayerContent) largePlayerInset else 0.dp) + navigationBarInset
         else (chrome.measuredBottomBarHeight ?: (bottomBarHeight + navigationBarInset)) +
-                floatingPlayerHeight
+                (if (hasPlayerContent) floatingPlayerHeight else 0.dp)
 
     fun sheetProgress(sheetOffsetPx: Float, sheetHeightPx: Float): Float =
         if (sheetHeightPx > 0f) {

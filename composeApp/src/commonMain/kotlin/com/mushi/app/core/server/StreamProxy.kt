@@ -29,7 +29,6 @@ import io.ktor.utils.io.readAvailable
 import io.ktor.utils.io.writeFully
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -40,7 +39,6 @@ import okio.SYSTEM
 import okio.buffer
 import okio.use
 import org.koin.core.component.KoinComponent
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.TimeSource
 
 internal class StreamProxy(
@@ -96,43 +94,14 @@ internal class StreamProxy(
                 return
             }
 
-            val isFirstRequest = streamingMutex.withLock {
-                if (trackId in streamingInProgress) {
-                    false
-                } else {
-                    streamingInProgress.add(trackId)
-                    true
-                }
-            }
-
-            if (!isFirstRequest) {
-                logger.d { "Track $trackId is being cached, waiting for cache" }
-                var waited = 0
-                while (waited < 30) {
-                    delay(200.milliseconds)
-                    waited++
-                    val entry = cacheManager.findCachedEntry(trackId)
-                    if (entry != null) {
-                        val (filePath, e) = entry
-                        logger.d { "Track $trackId became available from cache" }
-                        when (requestMethod) {
-                            HttpMethod.Head -> cacheManager.serveCacheHead(call, e)
-                            HttpMethod.Get -> cacheManager.serveCacheGet(call, filePath, e)
-                            else -> call.respond(HttpStatusCode.MethodNotAllowed)
-                        }
-                        return
-                    }
-                    // The caching request ended without committing (player disconnected or the
-                    // source was switched); nothing left to wait for.
-                    if (streamingMutex.withLock { trackId !in streamingInProgress }) break
-                }
-                logger.d { "No cache for track $trackId after waiting, falling through to upstream" }
-            }
-
+            // Only one request writes a track's cache file. Others (the player asking twice, or
+            // seeking mid-download) stream straight from upstream: holding them until the file
+            // is complete stalled playback for seconds.
+            val writesCache = streamingMutex.withLock { streamingInProgress.add(trackId) }
             try {
-                doStreamFromUpstream(call, trackId, requestMethod)
+                doStreamFromUpstream(call, trackId, requestMethod, allowCache = writesCache)
             } finally {
-                if (isFirstRequest) {
+                if (writesCache) {
                     streamingMutex.withLock { streamingInProgress.remove(trackId) }
                 }
             }
@@ -142,7 +111,12 @@ internal class StreamProxy(
         doStreamFromUpstream(call, trackId, requestMethod)
     }
 
-    private suspend fun doStreamFromUpstream(call: ApplicationCall, trackId: String, requestMethod: HttpMethod) {
+    private suspend fun doStreamFromUpstream(
+        call: ApplicationCall,
+        trackId: String,
+        requestMethod: HttpMethod,
+        allowCache: Boolean = false
+    ) {
         val resolveStart = TimeSource.Monotonic.markNow()
         val streamInfo = streamingUrlRepository.resolveStreamInfo(trackId)
         logger.i {
@@ -165,7 +139,7 @@ internal class StreamProxy(
             return
         }
 
-        proxyStream(call, streamInfo.url, trackId, requestMethod)
+        proxyStream(call, streamInfo.url, trackId, requestMethod, allowCache)
     }
 
     suspend fun handleManifestRequest(call: ApplicationCall) {
@@ -310,12 +284,17 @@ internal class StreamProxy(
         call: ApplicationCall,
         streamUrl: String,
         trackId: String,
-        requestMethod: HttpMethod
+        requestMethod: HttpMethod,
+        allowCache: Boolean
     ) {
         logger.d { "Proxying stream for track $trackId using $requestMethod" }
 
         var currentUrl = streamUrl
         var attemptedRefresh = false
+        // googlevideo throttles a request without a Range header to about playback speed, which
+        // held every song back for seconds. The player sends none when starting from the top, so
+        // ask for the whole file as a range and hand the player a plain 200 again.
+        val addWholeRange = requestMethod == HttpMethod.Get && call.request.headers[HttpHeaders.Range] == null
         val upstreamStart = TimeSource.Monotonic.markNow()
 
         // `request()` buffers the whole body before returning, which stalls the player until
@@ -330,6 +309,7 @@ internal class StreamProxy(
                     call.forwardRequestHeaderIfPresent(headers, HttpHeaders.IfRange)
                     call.forwardRequestHeaderIfPresent(headers, HttpHeaders.Accept)
                     call.forwardRequestHeaderIfPresent(headers, HttpHeaders.UserAgent)
+                    if (addWholeRange) headers.append(HttpHeaders.Range, WHOLE_RANGE)
                 }.execute { response ->
                     logger.i {
                         "[Req] upstream headers for $trackId after ${upstreamStart.elapsedNow()}: " +
@@ -337,7 +317,7 @@ internal class StreamProxy(
                             "headers=${response.headers.entries().joinToString { "${it.key}=${it.value}" }}"
                     }
                     if (response.status.value < 400) {
-                        respondWithUpstream(call, response, trackId, requestMethod)
+                        respondWithUpstream(call, response, trackId, requestMethod, addWholeRange, allowCache)
                         return@execute
                     }
 
@@ -352,7 +332,7 @@ internal class StreamProxy(
                             return@execute
                         }
                     }
-                    respondWithUpstream(call, response, trackId, requestMethod)
+                    respondWithUpstream(call, response, trackId, requestMethod, allowCache = allowCache)
                 }
             }.exceptionOrNull()
 
@@ -362,7 +342,12 @@ internal class StreamProxy(
                     logger.i(failure) { "[Req] player closed the connection while streaming track $trackId" }
                     return
                 }
-                logger.w(failure) { "Failed to fetch upstream stream for track $trackId" }
+                // Name the failure in the message: Android drops the stack trace of an
+                // UnknownHostException, which left a DNS failure with no reason at all.
+                logger.w(failure) {
+                    "Failed to fetch upstream stream for track $trackId after ${upstreamStart.elapsedNow()}: " +
+                        "${failure::class.simpleName}: ${failure.message?.take(200)}"
+                }
                 // Throws if the response already started streaming; nothing more to send then
                 runCatching { call.respond(HttpStatusCode.BadGateway, "Failed to fetch upstream stream") }
                 return
@@ -379,7 +364,9 @@ internal class StreamProxy(
         call: ApplicationCall,
         upstream: HttpResponse,
         trackId: String,
-        requestMethod: HttpMethod
+        requestMethod: HttpMethod,
+        addedWholeRange: Boolean = false,
+        allowCache: Boolean = false
     ) {
         if (upstream.status.value >= 400 && isCachingEnabled()) {
             val cachedEntry = cacheManager.findCachedEntry(trackId)
@@ -395,7 +382,16 @@ internal class StreamProxy(
             }
         }
 
-        val downstreamHeaders = upstreamHeadersToForward(upstream)
+        // The 206 answering our own range is, to a player that asked for none, an ordinary 200.
+        val answersWholeRange = addedWholeRange && upstream.status == HttpStatusCode.PartialContent &&
+            coversWholeResource(upstream.headers[HttpHeaders.ContentRange])
+        val downstreamStatus = if (answersWholeRange) HttpStatusCode.OK else upstream.status
+        val downstreamHeaders = upstreamHeadersToForward(upstream).let { headers ->
+            if (!answersWholeRange) headers else HeadersBuilder().apply {
+                appendAll(headers)
+                remove(HttpHeaders.ContentRange)
+            }.build()
+        }
         val downstreamContentLength = downstreamHeaders[HttpHeaders.ContentLength]?.toLongOrNull()
         logger.v {
             "Proxy response headers for $trackId status=${upstream.status.value} " +
@@ -407,7 +403,7 @@ internal class StreamProxy(
 
         if (requestMethod == HttpMethod.Head) {
             call.respond(object : OutgoingContent.NoContent() {
-                override val status: HttpStatusCode = upstream.status
+                override val status: HttpStatusCode = downstreamStatus
                 override val headers: Headers = downstreamHeaders.passthroughForPlayer()
                 override val contentLength: Long? = downstreamContentLength
             })
@@ -415,8 +411,8 @@ internal class StreamProxy(
         }
 
         // Only a full 200 response can be cached; 206 partial responses must not be stored as the whole track
-        val doCache = requestMethod == HttpMethod.Get && isCachingEnabled() &&
-                upstream.status == HttpStatusCode.OK
+        val doCache = allowCache && requestMethod == HttpMethod.Get && isCachingEnabled() &&
+                downstreamStatus == HttpStatusCode.OK
         val cacheTrack = if (doCache) getTrackMetadata(trackId) else null
         val cacheFilename = if (cacheTrack != null) {
             cacheManager.resolveCacheFilename(cacheTrack, downstreamHeaders[HttpHeaders.ContentType])
@@ -428,7 +424,7 @@ internal class StreamProxy(
         val cacheContentType = downstreamHeaders[HttpHeaders.ContentType] ?: "application/octet-stream"
 
         call.respond(object : OutgoingContent.WriteChannelContent() {
-            override val status: HttpStatusCode = upstream.status
+            override val status: HttpStatusCode = downstreamStatus
             override val headers: Headers = downstreamHeaders.passthroughForPlayer()
             override val contentLength: Long? = downstreamContentLength
             override val contentType: ContentType? =
@@ -578,6 +574,15 @@ internal class StreamProxy(
         }.build()
     }
 
+}
+
+private const val WHOLE_RANGE = "bytes=0-"
+
+/** True for `bytes 0-{n-1}/{n}`: the partial response is in fact the entire resource. */
+internal fun coversWholeResource(contentRange: String?): Boolean {
+    val match = contentRange?.let { Regex("""bytes 0-(\d+)/(\d+)""").matchEntire(it.trim()) } ?: return false
+    val (last, size) = match.destructured
+    return last.toLong() + 1 == size.toLong()
 }
 
 private val PLAYER_PASSTHROUGH_HEADERS = listOf(

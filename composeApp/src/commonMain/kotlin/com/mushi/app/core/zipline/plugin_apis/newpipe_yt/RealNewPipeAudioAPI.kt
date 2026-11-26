@@ -148,38 +148,41 @@ class RealNewPipeAudioAPI : AudioAPI, KoinComponent {
                 "album='${track.album?.title}' durationMs=${track.durationMs} trackIsrc=${track.isrcCode} " +
                 "externalUri=${track.externalUri}"
         }
-        val rawIsrc = track.isrcCode ?: isrcProvider.auto(track)
-        val isrcCode = rawIsrc
-            ?.trim()?.uppercase()?.replace("-", "")
-            ?.takeIf { isrcRegex.matches(it) }
-        logger.i {
-            "[Search] isrc raw=$rawIsrc (from ${if (track.isrcCode != null) "track" else "providers"}) " +
-                "validated=$isrcCode"
-        }
-
         val artistText = track.artists.joinToString(" ") { it.name }.trim()
         val firstArtist = track.artists.firstOrNull()?.name?.trim().orEmpty()
         val plainTitle = track.title.replace(Regex("[(\\[].*?[)\\]]"), " ").replace(Regex("\\s+"), " ").trim()
 
-        // Ordered from most to least trusted. The ISRC is only a hint: a text search for it on
-        // YouTube Music often returns unrelated songs, so every step is scored against the track
-        // and the next step runs until one result clears [confidentMatch].
-        val plan = buildList {
-            if (isrcCode != null) add("isrc" to (isrcCode to SearchKind.Songs))
-            add("songs: title+artist" to ("${track.title} $artistText".trim() to SearchKind.Songs))
+        fun validIsrc(raw: String?): Pair<String, SearchKind>? = raw
+            ?.trim()?.uppercase()?.replace("-", "")
+            ?.takeIf { isrcRegex.matches(it) }
+            ?.let { it to SearchKind.Songs }
+
+        fun fixed(query: String, kind: SearchKind): suspend () -> Pair<String, SearchKind>? = { query to kind }
+
+        // The ISRC is only a hint: a text search for it on YouTube Music often returns unrelated
+        // songs, so every step is scored against the track and the next step runs until one result
+        // clears [confidentMatch]. A track that carries its ISRC tries it first. Otherwise finding
+        // it means asking third-party sites, which is slow, so that waits until the plain
+        // title+artist search has failed to produce a confident match.
+        val plan = buildList<Pair<String, suspend () -> Pair<String, SearchKind>?>> {
+            val ownIsrc = validIsrc(track.isrcCode)
+            if (ownIsrc != null) add("isrc" to fixed(ownIsrc.first, ownIsrc.second))
+            add("songs: title+artist" to fixed("${track.title} $artistText".trim(), SearchKind.Songs))
+            if (track.isrcCode == null) add("isrc" to suspend { validIsrc(isrcProvider.auto(track)) })
             if (plainTitle.isNotEmpty() && firstArtist.isNotEmpty() && plainTitle != track.title) {
-                add("songs: plain title+first artist" to ("$plainTitle $firstArtist" to SearchKind.Songs))
+                add("songs: plain title+first artist" to fixed("$plainTitle $firstArtist", SearchKind.Songs))
             }
-            add("videos: title+artist" to ("${track.title} $artistText".trim() to SearchKind.Videos))
-            add("songs: title only" to (plainTitle.ifEmpty { track.title } to SearchKind.Songs))
+            add("videos: title+artist" to fixed("${track.title} $artistText".trim(), SearchKind.Videos))
+            add("songs: title only" to fixed(plainTitle.ifEmpty { track.title }, SearchKind.Songs))
         }
 
         val sources = linkedMapOf<String, AudioSource.Basic>()
         val searched = mutableSetOf<Pair<String, SearchKind>>()
         // Results of the text searches in YouTube's relevance order, used if nothing scores well
         val textSearchResults = linkedMapOf<String, AudioSource.Basic>()
-        for ((stage, request) in plan) {
+        for ((stage, buildRequest) in plan) {
             if (sources.values.any { it.confidence >= confidentMatch }) break
+            val request = buildRequest() ?: continue
             if (!searched.add(request)) continue
             val (query, kind) = request
             val raw = runCatching { newPipeService.searchVideos(query, kind) }

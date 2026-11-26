@@ -31,6 +31,7 @@ class NewPipeDownloader(private val cookieJar: PersistentCookieJar) : Downloader
     override fun execute(request: Request): Response {
         val httpMethod = request.httpMethod()
         val url = request.url()
+        LeanStreamLookup.standInFor(url)?.let { return it }
         val headers = request.headers()
         val dataToSend = request.dataToSend()
 

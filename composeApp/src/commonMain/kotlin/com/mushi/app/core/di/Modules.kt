@@ -89,6 +89,14 @@ import org.koin.core.module.dsl.viewModelOf
 import org.koin.core.module.dsl.withOptions
 import org.koin.dsl.module
 import com.mushi.app.core.zipline.permissions.PublicSuffixListRepository
+import com.mushi.app.core.server.NextTrackPreloader
+import com.mushi.app.core.server.TrackPreloader
+import kotlin.time.Duration
+import com.mushi.app.core.audioplayer.AudioPlayerInterface
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.SupervisorJob
 
 expect val platformModules: Module
 
@@ -176,7 +184,8 @@ val sharedModules = module {
             blacklistRepository = get(),
             shareService = get(),
             downloadManager = get(),
-            remotePlaybackController = get())
+            remotePlaybackController = get(),
+            trackPreloader = get())
     }
     viewModel { (playlistId: String) -> AddTracksToPlaylistViewModel(playlistId, get(), get()) }
 
@@ -226,6 +235,7 @@ val sharedModules = module {
     singleOf(::AlbumRepository)
     viewModel { (albumId: String) ->
         AlbumViewModel(
+            trackPreloader = get(),
             albumId = albumId,
             repository = get(),
             savedTracksRepository = get(),
@@ -260,6 +270,35 @@ val sharedModules = module {
             settingsRepository = get())
     }
     singleOf(::CacheManager)
+    single {
+        val urls = get<StreamingUrlRepository>()
+        val cache = get<CacheManager>()
+        val settings = get<UserSettingsSource>()
+        val logger = Logger.withTag("TrackPreloader")
+        TrackPreloader(
+            lookUp = { track ->
+                runCatching {
+                    // A song already in the music cache plays from disk, no stream needed
+                    val onDisk = settings.userSettings.value.enableMusicCaching &&
+                        cache.findCachedEntry(track.id) != null
+                    if (!onDisk) urls.resolveStreamInfo(track)
+                }.onFailure { logger.w(it) { "Couldn't preload ${track.id}" } }
+            },
+            scope = CoroutineScope(Dispatchers.IO + SupervisorJob()))
+    }
+    single {
+        val player = get<AudioPlayerInterface>()
+        val queue = get<AudioPlayerQueue>()
+        val preloader = get<TrackPreloader>()
+        NextTrackPreloader(
+            queue = queue.queueFlow,
+            currentEntry = queue.currentQueueEntryFlow,
+            playerState = player.playerStateFlow,
+            loopState = player.loopStateFlow,
+            // The preloader's own settle time has already passed by the time this is called
+            preload = { preloader.preloadOnceSettled(it, Duration.ZERO) },
+            scope = CoroutineScope(Dispatchers.IO + SupervisorJob()))
+    } withOptions { createdAtStart() }
     singleOf(::AlternativeTracksRepository)
     singleOf(::LocalServer) withOptions {
         createdAtStart()

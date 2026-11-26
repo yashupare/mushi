@@ -12,6 +12,7 @@ import com.mushi.app.core.playback.CollectionPlaybackHelper
 import com.mushi.app.core.remote.CollectionPlaybackUiState
 import com.mushi.app.core.remote.RemoteCollectionType
 import com.mushi.app.core.remote.RemotePlaybackController
+import com.mushi.app.core.server.TrackPreloader
 import com.mushi.app.core.share.ShareService
 import com.mushi.app.core.ui.component.TrackOptionsAction
 import com.mushi.app.core.ui.component.TrackOptionsContext
@@ -89,7 +90,8 @@ class PlaylistViewModel(
     private val blacklistRepository: BlacklistRepository,
     private val shareService: ShareService,
     private val downloadManager: DownloadManager,
-    private val remotePlaybackController: RemotePlaybackController) : ViewModel(), KoinComponent {
+    private val remotePlaybackController: RemotePlaybackController,
+    private val trackPreloader: TrackPreloader) : ViewModel(), KoinComponent {
     private val logger by injectLogger<PlaylistViewModel>()
 
     private val _state = MutableStateFlow<PlaylistScreenState>(PlaylistScreenState.Loading)
@@ -169,9 +171,18 @@ class PlaylistViewModel(
             isSaved = playlistInfo?.second ?: false,
             tracks = tracksResult?.items ?: emptyList(),
             nextPagination = tracksResult?.nextPagination)
+        preloadFirstTrack(tracksResult?.items.orEmpty())
     }.onFailure { e ->
         logger.e(e) { "Failed to load playlist" }
         _state.value = PlaylistScreenState.Error(e.message ?: getString(Res.string.common_unknown_error))
+    }
+
+    /** The track the play button would start with, looked up while the user reads the page. */
+    private fun preloadFirstTrack(tracks: List<MetadataTrack>) {
+        viewModelScope.launch {
+            val first = tracks.firstOrNull { !isTrackBlacklisted(it) } ?: return@launch
+            trackPreloader.preloadOnceSettled(first)
+        }
     }
 
     suspend fun loadMoreTracks() = runCatching {

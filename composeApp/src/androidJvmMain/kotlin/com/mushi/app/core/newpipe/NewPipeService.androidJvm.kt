@@ -51,92 +51,96 @@ actual class NewPipeService {
 
     actual suspend fun getVideoInfo(id: String): VideoInfo {
         return withContext(Dispatchers.IO) {
-            val extractor = YouTube.getStreamExtractor("https://www.youtube.com/watch?v=$id")
-            extractor.fetchPage()
+            LeanStreamLookup.run(isUsable = { it.audioStreams.isNotEmpty() }) { fetchVideoInfo(id) }
+        }
+    }
 
-            // Raw extractor output, before any mapping/filtering, so stream-selection issues can be
-            // traced back to what YouTube actually offered for this video.
-            logger.i {
-                "[Streams $id] '${extractor.name}' raw audioStreams=${extractor.audioStreams.size}:\n" +
-                    extractor.audioStreams.joinToString("\n") { stream ->
-                        "        itag=${stream.itag} format=${stream.format?.name} mime=${stream.format?.mimeType} " +
-                            "suffix=${stream.format?.suffix} codec=${stream.codec} bitrate=${stream.bitrate} " +
-                            "avgBitrate=${stream.averageBitrate} delivery=${stream.deliveryMethod} isUrl=${stream.isUrl} " +
-                            "trackType=${stream.audioTrackType}"
-                    }
-            }
-            logger.i {
-                "[Streams $id] dashMpdUrl=${extractor.dashMpdUrl.isNotBlank()} hlsUrl=${extractor.hlsUrl.isNotBlank()} " +
-                    "raw videoStreams=${extractor.videoStreams.size} videoOnlyStreams=${extractor.videoOnlyStreams.size}"
-            }
+    private fun fetchVideoInfo(id: String): VideoInfo {
+        val extractor = YouTube.getStreamExtractor("https://www.youtube.com/watch?v=$id")
+        extractor.fetchPage()
 
-            val audioStreams = extractor.audioStreams
-                .mapNotNull { stream ->
-                    val format = stream.format ?: return@mapNotNull null
-                    // Non-URL content is an inline manifest, not something a player or downloader can fetch.
-                    if (!stream.isUrl) return@mapNotNull null
-                    AudioStream.Lossy(
-                        url = stream.content,
-                        codec = normalizeCodec(stream.codec),
-                        container = normalizeContainer(format.suffix),
-                        bitrate = stream.bitrate,
-                        protocol = stream.deliveryMethod.toProtocol())
-                } + buildList {
-                if (extractor.dashMpdUrl.isNotBlank()) add(
-                    AudioStream.Lossy(
-                        url = extractor.dashMpdUrl,
-                        codec = "aac",
-                        container = "mp4",
-                        bitrate = 128_000,
-                        protocol = StreamProtocol.DASH
-                    )
-                )
-                if (extractor.hlsUrl.isNotBlank()) add(
-                    AudioStream.Lossy(
-                        url = extractor.hlsUrl,
-                        codec = "aac",
-                        container = "mp4",
-                        bitrate = 128_000,
-                        protocol = StreamProtocol.HLS
-                    )
-                )
-            }
-
-            val videoStreams = extractor.videoStreams
-                .filter { stream -> stream.isUrl && stream.format != null }
-                .map { stream ->
-                    AudioStream.Lossy(
-                        url = stream.content,
-                        codec = stream.codec,
-                        bitrate = stream.bitrate,
-                        container = stream.format!!.suffix)
+        // Raw extractor output, before any mapping/filtering, so stream-selection issues can be
+        // traced back to what YouTube actually offered for this video.
+        logger.i {
+            "[Streams $id] '${extractor.name}' raw audioStreams=${extractor.audioStreams.size}:\n" +
+                extractor.audioStreams.joinToString("\n") { stream ->
+                    "        itag=${stream.itag} format=${stream.format?.name} mime=${stream.format?.mimeType} " +
+                        "suffix=${stream.format?.suffix} codec=${stream.codec} bitrate=${stream.bitrate} " +
+                        "avgBitrate=${stream.averageBitrate} delivery=${stream.deliveryMethod} isUrl=${stream.isUrl} " +
+                        "trackType=${stream.audioTrackType}"
                 }
-            logger.i {
-                "[Streams $id] mapped audio candidates (${audioStreams.size}):\n" +
-                    audioStreams.joinToString("\n") { "        ${it.describeForLog()}" }
-            }
-            VideoInfo(
-                id = id,
-                title = extractor.name,
-                url = extractor.url,
-                uploader = extractor.uploaderName,
-                durationMs = secondsToMs(extractor.length),
-                thumbnailUrl = extractor.thumbnails.first().url,
-                // fallback to video streams if no audio streams are available
-                audioStreams = audioStreams.ifEmpty {
-                    logger.w {
-                        "[Streams $id] no audio streams; FALLING BACK TO ${videoStreams.size} VIDEO streams " +
-                            "(muxed video+audio, downloads will be video files):\n" +
-                            extractor.videoStreams.joinToString("\n") {
-                                "        itag=${it.itag} format=${it.format?.name} res=${it.resolution} " +
-                                    "codec=${it.codec} videoOnly=${it.isVideoOnly} isUrl=${it.isUrl}"
-                            }
-                    }
-                    videoStreams
-                },
-                videoStreams = videoStreams
+        }
+        logger.i {
+            "[Streams $id] dashMpdUrl=${extractor.dashMpdUrl.isNotBlank()} hlsUrl=${extractor.hlsUrl.isNotBlank()} " +
+                "raw videoStreams=${extractor.videoStreams.size} videoOnlyStreams=${extractor.videoOnlyStreams.size}"
+        }
+
+        val audioStreams = extractor.audioStreams
+            .mapNotNull { stream ->
+                val format = stream.format ?: return@mapNotNull null
+                // Non-URL content is an inline manifest, not something a player or downloader can fetch.
+                if (!stream.isUrl) return@mapNotNull null
+                AudioStream.Lossy(
+                    url = stream.content,
+                    codec = normalizeCodec(stream.codec),
+                    container = normalizeContainer(format.suffix),
+                    bitrate = stream.bitrate,
+                    protocol = stream.deliveryMethod.toProtocol())
+            } + buildList {
+            if (extractor.dashMpdUrl.isNotBlank()) add(
+                AudioStream.Lossy(
+                    url = extractor.dashMpdUrl,
+                    codec = "aac",
+                    container = "mp4",
+                    bitrate = 128_000,
+                    protocol = StreamProtocol.DASH
+                )
+            )
+            if (extractor.hlsUrl.isNotBlank()) add(
+                AudioStream.Lossy(
+                    url = extractor.hlsUrl,
+                    codec = "aac",
+                    container = "mp4",
+                    bitrate = 128_000,
+                    protocol = StreamProtocol.HLS
+                )
             )
         }
+
+        val videoStreams = extractor.videoStreams
+            .filter { stream -> stream.isUrl && stream.format != null }
+            .map { stream ->
+                AudioStream.Lossy(
+                    url = stream.content,
+                    codec = stream.codec,
+                    bitrate = stream.bitrate,
+                    container = stream.format!!.suffix)
+            }
+        logger.i {
+            "[Streams $id] mapped audio candidates (${audioStreams.size}):\n" +
+                audioStreams.joinToString("\n") { "        ${it.describeForLog()}" }
+        }
+        return VideoInfo(
+            id = id,
+            title = extractor.name,
+            url = extractor.url,
+            uploader = extractor.uploaderName,
+            durationMs = secondsToMs(extractor.length),
+            thumbnailUrl = extractor.thumbnails.first().url,
+            // fallback to video streams if no audio streams are available
+            audioStreams = audioStreams.ifEmpty {
+                logger.w {
+                    "[Streams $id] no audio streams; FALLING BACK TO ${videoStreams.size} VIDEO streams " +
+                        "(muxed video+audio, downloads will be video files):\n" +
+                        extractor.videoStreams.joinToString("\n") {
+                            "        itag=${it.itag} format=${it.format?.name} res=${it.resolution} " +
+                                "codec=${it.codec} videoOnly=${it.isVideoOnly} isUrl=${it.isUrl}"
+                        }
+                }
+                videoStreams
+            },
+            videoStreams = videoStreams
+        )
     }
 }
 

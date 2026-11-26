@@ -10,6 +10,7 @@ import com.mushi.app.modules.settings.UserSettings
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
 import kotlinx.coroutines.test.runTest
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
@@ -275,6 +276,58 @@ class StreamingUrlRepositoryBehaviorTest {
         h.settings.update { copy(streamingMusicQuality = AudioQuality.Lossy(320_000)) }
         val second = h.repository.resolveStreamInfo(t)
         assertEquals("https://example.com/320.opus", second?.url)
+    }
+
+    @Test
+    fun `a url that states its own expiry stays cached past the fallback ttl`() = kotlinx.coroutines.runBlocking {
+        val h = Harness(cacheTtlMs = 10)
+        val t = track("t1")
+        val plugin = h.selectPlugin("pluginA")
+        val expire = kotlin.time.Clock.System.now().epochSeconds + 6 * 3600
+        plugin.audioAPI.onGetStreamsByTrack = {
+            listOf(streamedSource("src1", listOf(stream("https://example.com/videoplayback?expire=$expire"))))
+        }
+
+        h.repository.resolveStreamInfo(t)
+        kotlinx.coroutines.delay(50)
+        h.repository.resolveStreamInfo(t)
+
+        assertEquals(1, plugin.audioAPI.getStreamsByTrackCallCount)
+        assertEquals(0, plugin.audioAPI.getStreamsOfAudioSourceCallCount)
+    }
+
+    @Test
+    fun `a url about to expire is resolved again`() = kotlinx.coroutines.runBlocking {
+        val h = Harness()
+        val t = track("t1")
+        val plugin = h.selectPlugin("pluginA")
+        val expire = kotlin.time.Clock.System.now().epochSeconds + 60
+        plugin.audioAPI.onGetStreamsByTrack = {
+            listOf(streamedSource("src1", listOf(stream("https://example.com/videoplayback?expire=$expire"))))
+        }
+
+        h.repository.resolveStreamInfo(t)
+        h.repository.resolveStreamInfo(t)
+
+        // The second call goes back to the matched source instead of serving the cached url
+        assertEquals(2, h.matchedTracksRepository.getCallCount)
+    }
+
+    @Test
+    fun `two requests for the same track at once share one lookup`() = runTest {
+        val h = Harness()
+        val t = track("t1")
+        val plugin = h.selectPlugin("pluginA")
+        plugin.audioAPI.onGetStreamsByTrack = {
+            kotlinx.coroutines.delay(100)
+            listOf(streamedSource("src1", listOf(stream("https://example.com/a.opus"))))
+        }
+
+        val first = async { h.repository.resolveStreamInfo(t) }
+        val second = async { h.repository.resolveStreamInfo(t) }
+
+        assertEquals(first.await(), second.await())
+        assertEquals(1, plugin.audioAPI.getStreamsByTrackCallCount)
     }
 
     @Test

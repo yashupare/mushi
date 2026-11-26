@@ -19,6 +19,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.component.KoinComponent
 import kotlin.math.abs
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 data class CachedStreamUrl(
@@ -68,6 +69,8 @@ class StreamingUrlRepository(
     private val streamUrlCache = mutableMapOf<String, CachedStreamUrl>()
     private val alternativesCacheMutex = Mutex()
     private val alternativesCache = mutableMapOf<String, CachedAlternatives>()
+    private val resolveLocksMutex = Mutex()
+    private val resolveLocks = mutableMapOf<String, Mutex>()
 
     suspend fun resolveStreamInfo(
         trackId: String,
@@ -88,6 +91,18 @@ class StreamingUrlRepository(
         track: MetadataTrack,
         forceRefresh: Boolean = false,
         request: StreamRequest? = null
+    ): StreamInfo? {
+        if (request != null) return resolve(track, forceRefresh, request)
+        // One playback lookup per track at a time: pressing next while that track is still being
+        // preloaded waits for the preload's answer instead of asking YouTube all over again.
+        val lock = resolveLocksMutex.withLock { resolveLocks.getOrPut(track.id) { Mutex() } }
+        return lock.withLock { resolve(track, forceRefresh, request) }
+    }
+
+    private suspend fun resolve(
+        track: MetadataTrack,
+        forceRefresh: Boolean,
+        request: StreamRequest?
     ): StreamInfo? {
         val trackId = track.id
         val settings = settingsRepository.userSettings.value
@@ -295,7 +310,12 @@ class StreamingUrlRepository(
         source: AudioSource.Streamed,
         selectedStream: AudioStream,
         pluginId: String) {
-        val expiresAtMs = Clock.System.now().toEpochMilliseconds() + streamUrlCacheTtlMs
+        val now = Clock.System.now().toEpochMilliseconds()
+        // Resolving takes seconds, so keep a url for as long as it says it is valid: replaying,
+        // seeking or resuming a song then starts at once. A url the server rejects early (the
+        // network changed, say) is invalidated by the proxy and resolved afresh.
+        val expiresAtMs = statedExpiryMs(info)?.let { it - STREAM_URL_EXPIRY_MARGIN.inWholeMilliseconds }
+            ?: (now + streamUrlCacheTtlMs)
         streamUrlCacheMutex.withLock {
             streamUrlCache[trackId] = CachedStreamUrl(
                 url = info.url,
@@ -366,6 +386,18 @@ class StreamingUrlRepository(
  * resolved against the YouTube origin; progressive URLs are returned unchanged.
  */
 private val AUDIO_PLUGIN_LOAD_TIMEOUT = 30.seconds
+private val STREAM_URL_EXPIRY_MARGIN = 5.minutes
+
+/**
+ * The `expire` query parameter (epoch seconds) of a progressive url, as googlevideo sends it.
+ * Manifests are left on the short TTL: a rejected segment doesn't invalidate the cached url.
+ */
+private fun statedExpiryMs(info: StreamInfo): Long? {
+    if (info.protocol != StreamProtocol.PROGRESSIVE) return null
+    return runCatching { io.ktor.http.Url(info.url).parameters["expire"]?.toLongOrNull() }
+        .getOrNull()
+        ?.times(1000)
+}
 
 internal fun normalizeManifestUrl(url: String, protocol: StreamProtocol): String {
     if (url.startsWith("http")) return url

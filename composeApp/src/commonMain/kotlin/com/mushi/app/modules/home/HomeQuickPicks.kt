@@ -33,6 +33,8 @@ import com.mushi.app.generated.resources.home_greeting_afternoon
 import com.mushi.app.generated.resources.home_greeting_evening
 import com.mushi.app.generated.resources.home_greeting_morning
 import kotlin.time.Clock
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 /** "Good morning", "Good afternoon" or "Good evening", by the device's local time. */
 @Composable
@@ -67,6 +69,8 @@ internal fun QuickPicksGrid(
     onClick: (MetadataBrowseItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val audioPlayerQueue: com.mushi.app.core.audioplayer.AudioPlayerQueue = org.koin.compose.koinInject()
+    val playing by audioPlayerQueue.currentCollectionEntryFlow.collectAsStateWithLifecycle()
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -76,8 +80,14 @@ internal fun QuickPicksGrid(
         picks.chunked(2).forEach { pair ->
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 pair.forEach { pick ->
+                    val itemId = when (val item = pick.item) {
+                        is MetadataBrowseItem.Album -> item.data.id
+                        is MetadataBrowseItem.Playlist -> item.data.id
+                        else -> null
+                    }
                     QuickPickTile(
                         pick = pick,
+                        isPlaying = itemId != null && itemId == playing?.id,
                         onClick = { onClick(pick.item) },
                         modifier = Modifier.weight(1f))
                 }
@@ -90,6 +100,7 @@ internal fun QuickPicksGrid(
 @Composable
 private fun QuickPickTile(
     pick: QuickPick,
+    isPlaying: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -113,6 +124,9 @@ private fun QuickPickTile(
                 contentDescription = null,
                 modifier = Modifier.size(60.dp),
                 contentScale = ContentScale.Crop)
+            if (isPlaying) {
+                com.mushi.app.core.ui.component.NowPlayingBadge(Modifier.align(Alignment.Center))
+            }
         }
         Text(
             text = pick.title,

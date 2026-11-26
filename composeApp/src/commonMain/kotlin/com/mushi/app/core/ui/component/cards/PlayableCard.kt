@@ -106,13 +106,20 @@ fun PlayableCard(
                     shape = RoundedCornerShape(10.dp)
                 )
 
+                if (isPlaying) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().aspectRatio(1f).padding(8.dp),
+                        contentAlignment = Alignment.BottomStart
+                    ) { com.mushi.app.core.ui.component.NowPlayingBadge() }
+                }
+
                 if (onPlay != null || onAddToQueue != null)
                     Box(
                         modifier = Modifier.fillMaxWidth().aspectRatio(1f).padding(8.dp),
                         contentAlignment = Alignment.BottomEnd
                     ) {
                         this@Column.AnimatedVisibility(
-                            visible = highlighted || touchInput || (isPlaying && onPlay != null) ||
+                            visible = (highlighted && !touchInput) || (isPlaying && onPlay != null) ||
                                 playLoading || addToQueueLoading,
                             enter = fadeIn(),
                             exit = fadeOut()
@@ -123,8 +130,8 @@ fun PlayableCard(
                             ) {
                                 // While this collection is playing the play/pause toggle stays
                                 // visible and the add-to-queue action is hidden entirely.
-                                // On touch only the play button shows; the queue action lives in the
-                                // item's own page and menus, so covers aren't covered in icons.
+                                // On touch a tap opens the item, where Play lives, so covers stay
+                                // clear unless this one is playing.
                                 onAddToQueue?.takeIf { !isPlaying && !touchInput }?.let {
                                     MillenniumIconButton(
                                         onClick = onAddToQueue,

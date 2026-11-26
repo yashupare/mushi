@@ -28,10 +28,25 @@ import com.mushi.app.generated.resources.Res
 import com.mushi.app.generated.resources.player_like_content_description
 import com.mushi.app.generated.resources.player_unlike_content_description
 
+/** Whether the current track is liked, and how to change that. */
+internal class CurrentTrackLike(
+    val trackId: String?,
+    val isLiked: Boolean,
+    /** False until the saved state is known, so a tap can't undo an unseen like. */
+    val isKnown: Boolean,
+    val isPending: Boolean,
+    private val viewModel: SavedTracksViewModel
+) {
+    fun toggle() {
+        trackId?.let { viewModel.toggleSavedTrack(it, isLiked) }
+    }
+}
+
 @Composable
-fun PlayerHeartButton(
+internal fun rememberCurrentTrackLike(
     audioPlayerQueue: AudioPlayerQueue,
-    savedTracksViewModel: SavedTracksViewModel) {
+    savedTracksViewModel: SavedTracksViewModel
+): CurrentTrackLike {
     val currentQueueEntry by audioPlayerQueue.currentQueueEntryFlow.collectAsStateWithLifecycle()
     val currentTrackId = (currentQueueEntry as? QueueEntry.StreamingTrack)?.track?.id
     val isSavedTrackState =
@@ -45,6 +60,21 @@ fun PlayerHeartButton(
     } else {
         isInSavedIds
     }
+
+    return CurrentTrackLike(
+        trackId = currentTrackId,
+        isLiked = isLiked,
+        isKnown = isSavedTrackState is SavedState.Success,
+        isPending = currentTrackId != null && currentTrackId in pendingSavedTrackIds,
+        viewModel = savedTracksViewModel)
+}
+
+@Composable
+fun PlayerHeartButton(
+    audioPlayerQueue: AudioPlayerQueue,
+    savedTracksViewModel: SavedTracksViewModel) {
+    val like = rememberCurrentTrackLike(audioPlayerQueue, savedTracksViewModel)
+    val isLiked = like.isLiked
 
     val haptics = com.mushi.app.core.ui.rememberHaptics()
 
@@ -81,14 +111,14 @@ fun PlayerHeartButton(
         }) {
     MillenniumIconButton(
         onClick = {
-            currentTrackId?.let {
+            if (like.trackId != null) {
                 haptics.tap()
                 if (!isLiked) playBurst()
-                savedTracksViewModel.toggleSavedTrack(it, isLiked)
+                like.toggle()
             }
         },
-        enabled = isSavedTrackState is SavedState.Success,
-        loading = currentTrackId != null && currentTrackId in pendingSavedTrackIds,
+        enabled = like.isKnown,
+        loading = like.isPending,
         style = MillenniumIconButtonStyle.Quiet) {
         MillenniumIcon(
             imageVector = if (isLiked) Iconsax.IconsaxHeart2 else Iconsax.IconsaxHeart,
@@ -103,7 +133,7 @@ fun PlayerHeartButton(
     }
 }
 
-private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawLikeBurst(
+internal fun androidx.compose.ui.graphics.drawscope.DrawScope.drawLikeBurst(
     progress: Float,
     colors: List<androidx.compose.ui.graphics.Color>,
 ) {

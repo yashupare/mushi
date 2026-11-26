@@ -39,7 +39,6 @@ import com.mushi.app.resources.iconsax.IconsaxCd
 import com.mushi.app.resources.iconsax.IconsaxDirectboxReceive
 import com.mushi.app.resources.iconsax.IconsaxHeart
 import com.mushi.app.resources.iconsax.IconsaxHeart2
-import com.mushi.app.resources.iconsax.IconsaxMusicCircle
 import com.mushi.app.resources.iconsax.IconsaxMusicPlaylist
 import com.mushi.app.resources.iconsax.IconsaxMusicSquareRemove
 import com.mushi.app.resources.iconsax.IconsaxMusicSquareRemoveFilled
@@ -47,6 +46,7 @@ import com.mushi.app.resources.iconsax.IconsaxNext
 import com.mushi.app.resources.iconsax.IconsaxShare
 import org.jetbrains.compose.resources.stringResource
 import com.mushi.app.generated.resources.*
+import androidx.compose.foundation.background
 
 sealed interface TrackOptionsAction {
     data object AddToJam : TrackOptionsAction
@@ -165,12 +165,22 @@ fun TrackOptionsBottomSheet(
         Column(modifier = Modifier.fillMaxWidth()) {
             TrackOptionsSheetHeader(track = track)
 
+            QuickActions(
+                track = track,
+                state = state,
+                isJamGuest = isJamGuest,
+                onAction = { action ->
+                    hapticAction(action)
+                    onDismiss()
+                })
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 buildTrackMenuItems(
+                    withQuickActions = false,
                     track = track,
                     state = state,
                     onAction = { action ->
@@ -215,6 +225,78 @@ fun TrackOptionsBottomSheet(
                 }
             }
         }
+    }
+}
+
+/** The three things people do most, as large buttons above the rest of the menu. */
+@Composable
+private fun QuickActions(
+    track: MetadataTrack,
+    state: TrackOptionsState,
+    isJamGuest: Boolean,
+    onAction: (TrackOptionsAction) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        QuickAction(
+            icon = if (state.isFavorite) Iconsax.IconsaxHeart2 else Iconsax.IconsaxHeart,
+            label = stringResource(
+                if (state.isFavorite) Res.string.track_options_quick_liked else Res.string.track_options_quick_like),
+            highlighted = state.isFavorite,
+            onClick = { onAction(TrackOptionsAction.ToggleFavorite) },
+            modifier = Modifier.weight(1f))
+        if (!isJamGuest) {
+            QuickAction(
+                icon = if (state.isInQueue) com.mushi.app.core.ui.theming.MushiIcons.Trash
+                    else Iconsax.IconsaxAddSquare,
+                label = stringResource(
+                    if (state.isInQueue) Res.string.track_options_quick_unqueue
+                    else Res.string.player_add_to_queue_content_description),
+                onClick = {
+                    onAction(
+                        if (state.isInQueue) TrackOptionsAction.RemoveFromQueue
+                        else TrackOptionsAction.AddToQueue)
+                },
+                modifier = Modifier.weight(1f))
+        }
+        if (!track.externalUri.isNullOrBlank()) {
+            QuickAction(
+                icon = com.mushi.app.core.ui.theming.MushiIcons.Share,
+                label = stringResource(Res.string.track_options_share),
+                onClick = { onAction(TrackOptionsAction.Share) },
+                modifier = Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+private fun QuickAction(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    highlighted: Boolean = false) {
+    Column(
+        modifier = modifier
+            .clip(AppTheme.shapes.medium)
+            .background(AppTheme.colors.onSurface.copy(alpha = 0.08f))
+            .clickable(role = androidx.compose.ui.semantics.Role.Button, onClick = onClick)
+            .padding(vertical = 14.dp, horizontal = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        MillenniumIcon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(24.dp),
+            tint = if (highlighted) AppTheme.colors.primary else AppTheme.colors.onSurface)
+        Text(
+            text = label,
+            style = AppTheme.typography.labelMedium,
+            color = AppTheme.colors.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis)
     }
 }
 
@@ -265,7 +347,9 @@ private fun buildTrackMenuItems(
     onAction: (TrackOptionsAction) -> Unit,
     onAlbumClick: () -> Unit,
     isInJam: Boolean = false,
-    isJamGuest: Boolean = false): List<AdaptiveMenuItem> = buildList {
+    isJamGuest: Boolean = false,
+    /** False where [QuickActions] already shows like, queue and share. */
+    withQuickActions: Boolean = true): List<AdaptiveMenuItem> = buildList {
     if (isInJam) {
         add(
             AdaptiveMenuItem(
@@ -273,12 +357,6 @@ private fun buildTrackMenuItems(
                 label = stringResource(Res.string.track_options_add_to_jam),
                 onClick = { onAction(TrackOptionsAction.AddToJam) }))
     }
-
-    add(
-        AdaptiveMenuItem(
-            icon = Iconsax.IconsaxMusicCircle,
-            label = stringResource(Res.string.track_options_start_radio),
-            onClick = { onAction(TrackOptionsAction.StartRadio) }))
 
     // A guest's queue is the shared jam queue — mutating it locally is not
     // allowed, so queue actions are replaced by "Add to Jam".
@@ -297,7 +375,9 @@ private fun buildTrackMenuItems(
                     onClick = { onAction(TrackOptionsAction.PlayNext) }))
         }
 
-        if (!state.isInQueue) {
+        if (!withQuickActions) {
+            // Shown above the list
+        } else if (!state.isInQueue) {
             add(
                 AdaptiveMenuItem(
                     icon = Iconsax.IconsaxAddSquare,
@@ -306,17 +386,19 @@ private fun buildTrackMenuItems(
         } else {
             add(
                 AdaptiveMenuItem(
-                    icon = com.mushi.app.core.ui.theming.MushiIcons.MusicBlock,
+                    icon = com.mushi.app.core.ui.theming.MushiIcons.Trash,
                     label = stringResource(Res.string.track_options_remove_from_queue),
                     onClick = { onAction(TrackOptionsAction.RemoveFromQueue) }))
         }
     }
 
-    add(
-        AdaptiveMenuItem(
-            icon = if (state.isFavorite) Iconsax.IconsaxHeart2 else Iconsax.IconsaxHeart,
-            label = if (state.isFavorite) stringResource(Res.string.track_options_remove_from_favorites) else stringResource(Res.string.track_options_save_as_favorite),
-            onClick = { onAction(TrackOptionsAction.ToggleFavorite) }))
+    if (withQuickActions) {
+        add(
+            AdaptiveMenuItem(
+                icon = if (state.isFavorite) Iconsax.IconsaxHeart2 else Iconsax.IconsaxHeart,
+                label = if (state.isFavorite) stringResource(Res.string.track_options_remove_from_favorites) else stringResource(Res.string.track_options_save_as_favorite),
+                onClick = { onAction(TrackOptionsAction.ToggleFavorite) }))
+    }
 
     add(
         AdaptiveMenuItem(
@@ -332,11 +414,11 @@ private fun buildTrackMenuItems(
 
     add(
         AdaptiveMenuItem(
-            icon = com.mushi.app.core.ui.theming.MushiIcons.MusicBlock,
+            icon = com.mushi.app.core.ui.theming.MushiIcons.Forbidden,
             label = if (state.isBlacklisted) stringResource(Res.string.blacklist_remove) else stringResource(Res.string.blacklist_add),
             onClick = { onAction(TrackOptionsAction.ToggleBlacklist) }))
 
-    if (!track.externalUri.isNullOrBlank()) {
+    if (withQuickActions && !track.externalUri.isNullOrBlank()) {
         add(
             AdaptiveMenuItem(
                 icon = com.mushi.app.core.ui.theming.MushiIcons.Share,

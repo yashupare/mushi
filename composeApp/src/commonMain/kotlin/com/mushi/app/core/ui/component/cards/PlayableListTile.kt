@@ -85,15 +85,20 @@ fun PlayableListTile(
             vertical = if (compact) 6.dp else 8.dp),
         minimumHeight = if (compact) 52.dp else 72.dp,
         leading = {
-            MediaArtwork(
-                imageModel, title,
-                Modifier.size(if (compact) 36.dp else 60.dp).sharedElementOrNone(
-                    sharedElementKey,
-                    LocalSharedTransitionScope.current,
-                    LocalAnimatedVisibilityScope.current
-                ),
-                imageShape, placeholderIcon, artwork
-            )
+            androidx.compose.foundation.layout.Box(
+                contentAlignment = androidx.compose.ui.Alignment.Center
+            ) {
+                MediaArtwork(
+                    imageModel, title,
+                    Modifier.size(if (compact) 36.dp else 60.dp).sharedElementOrNone(
+                        sharedElementKey,
+                        LocalSharedTransitionScope.current,
+                        LocalAnimatedVisibilityScope.current
+                    ),
+                    imageShape, placeholderIcon, artwork
+                )
+                if (isPlaying) com.mushi.app.core.ui.component.NowPlayingBadge()
+            }
         },
         title = {
             TextWithShimmer(

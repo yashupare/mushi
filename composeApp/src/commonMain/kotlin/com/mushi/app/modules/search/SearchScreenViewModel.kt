@@ -96,6 +96,16 @@ class SearchScreenViewModel(
 
     private var queryJob: Job? = null
 
+    private val categoryCoverLoader = CategoryCovers(
+        findCover = { category ->
+            repository.searchPlaylists(category).items
+                .firstNotNullOfOrNull { it.data.thumbnails.firstOrNull()?.url }
+        },
+        scope = viewModelScope)
+    val categoryCovers: StateFlow<Map<String, String>> = categoryCoverLoader.covers
+
+    fun loadCategoryCover(category: String) = categoryCoverLoader.load(category)
+
     init {
         viewModelScope.launch {
             database.settingsDataStore.data.collect { preferences ->

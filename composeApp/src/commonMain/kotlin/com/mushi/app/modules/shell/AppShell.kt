@@ -81,6 +81,15 @@ import org.spotube.millennium.composables.MillenniumSeparator
 import org.spotube.millennium.composables.MillenniumSnackbarHost
 import org.spotube.millennium.composables.MillenniumSnackbarHostState
 import org.spotube.millennium.theme.MillenniumTheme
+import com.mushi.app.core.i18n.getString
+import com.mushi.app.core.remote.QueueAdd
+import com.mushi.app.generated.resources.Res
+import com.mushi.app.generated.resources.queue_added_message
+import com.mushi.app.generated.resources.queue_already_added_message
+import com.mushi.app.generated.resources.queue_added_undo
+import kotlinx.coroutines.flow.collectLatest
+import org.spotube.millennium.composables.MillenniumSnackbarDuration
+import org.spotube.millennium.composables.MillenniumSnackbarResult
 
 val LocalAppShellBottomInset = staticCompositionLocalOf { 0.dp }
 
@@ -99,6 +108,19 @@ fun AppShell(
     LaunchedEffect(remotePlaybackController) {
         remotePlaybackController.events.collect { message ->
             snackbarHostState.showSnackbar(message)
+        }
+    }
+    // A newer add replaces the message of an older one.
+    LaunchedEffect(remotePlaybackController) {
+        remotePlaybackController.queueAdds.collectLatest { add ->
+            val added = add as? QueueAdd.Added
+            val result = snackbarHostState.showSnackbar(
+                getString(if (added != null) Res.string.queue_added_message else Res.string.queue_already_added_message),
+                added?.let { getString(Res.string.queue_added_undo) },
+                MillenniumSnackbarDuration.Short)
+            if (added != null && result == MillenniumSnackbarResult.ActionPerformed) {
+                remotePlaybackController.undoQueueAdd(added)
+            }
         }
     }
     val isQueueVisible by queueViewModel.isQueueVisible.collectAsState()

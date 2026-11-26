@@ -1,6 +1,5 @@
 package com.mushi.app.modules.library
 
-import com.mushi.app.core.ui.component.MushiButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -40,16 +39,11 @@ import com.mushi.app.resources.iconsax.IconsaxAddSquare
 import com.mushi.app.resources.iconsax.IconsaxCloseSquare
 import com.mushi.app.resources.iconsax.IconsaxRefreshRight
 import com.mushi.app.resources.iconsax.IconsaxSearchBroken
-import androidx.compose.foundation.layout.Box
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import org.jetbrains.compose.resources.StringResource
 import com.mushi.app.modules.plugin.guard.MetadataPluginGuard
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.spotube.millennium.adaptive.WindowBreakpoints
-import org.spotube.millennium.composables.MillenniumButton
-import org.spotube.millennium.composables.MillenniumButtonStyle
 import org.spotube.millennium.composables.MillenniumIconButton
 import org.spotube.millennium.composables.MillenniumIconButtonStyle
 import org.spotube.millennium.composables.MillenniumTextField
@@ -77,45 +71,38 @@ fun LibraryScreen(libraryState: LibraryState = koinInject()) {
         return
     }
 
-    val titleState = com.mushi.app.core.ui.component.rememberLargeTitleState()
-    val showLargeTitle = isCompact && !compactDesktop && !state.searchMode
+    val showPageHeader = isCompact && !compactDesktop && !state.searchMode
 
-    Column(Modifier.fillMaxSize().nestedScroll(titleState.connection)) {
-        ApplicationMainBar(
-            backButton = false,
-            title = {
-                // With a large title below, the bar's own title appears once that has scrolled away.
-                Box(
-                    Modifier.graphicsLayer {
-                        alpha = if (showLargeTitle) titleState.fraction else 1f
-                    }
-                ) { LibraryToolbarTitle(state, expandedDesktop, compactDesktop) }
-            },
-            actions = {
-                LibraryToolbarActions(
-                    state = state,
-                    expandedDesktop = expandedDesktop,
-                    onOpenSearch = libraryState::openSearch,
-                    onCloseSearch = {
-                        focusManager.clearFocus()
-                        keyboard?.hide()
-                        libraryState.closeSearch()
-                    },
-                    onCreatePlaylist = libraryState::showCreatePlaylist,
-                    onRefresh = libraryState::refreshLocalTracks,
-                    onToggleView = { libraryState.toggleViewMode(isCompact) },
-                    viewMode = viewMode,
-                    compactDesktop = compactDesktop
-                )
-                if (isCompact) {
-                    com.mushi.app.core.ui.component.ProfileButton()
-                }
+    Column(Modifier.fillMaxSize()) {
+        val headerActions: @Composable RowScope.() -> Unit = {
+            LibraryToolbarActions(
+                state = state,
+                expandedDesktop = expandedDesktop,
+                onOpenSearch = libraryState::openSearch,
+                onCloseSearch = {
+                    focusManager.clearFocus()
+                    keyboard?.hide()
+                    libraryState.closeSearch()
+                },
+                onCreatePlaylist = libraryState::showCreatePlaylist,
+                onRefresh = libraryState::refreshLocalTracks,
+                onToggleView = { libraryState.toggleViewMode(isCompact) },
+                viewMode = viewMode,
+                compactDesktop = compactDesktop
+            )
+            if (isCompact) {
+                com.mushi.app.core.ui.component.ProfileButton()
             }
-        )
-        if (showLargeTitle) {
-            com.mushi.app.core.ui.component.LargeTitle(
-                text = stringResource(Res.string.library_screen_title),
-                state = titleState)
+        }
+        if (showPageHeader) {
+            com.mushi.app.core.ui.component.PageHeader(
+                title = stringResource(Res.string.library_screen_title),
+                actions = headerActions)
+        } else {
+            ApplicationMainBar(
+                backButton = false,
+                title = { LibraryToolbarTitle(state, expandedDesktop, compactDesktop) },
+                actions = headerActions)
         }
         if (!expandedDesktop) {
             LibraryTabs(state, libraryState::onTabSelected)
@@ -145,14 +132,14 @@ fun LibraryScreen(libraryState: LibraryState = koinInject()) {
 @Composable
 private fun LibraryTabs(state: LibraryToolbarUiState, onTabSelected: (LibraryTab) -> Unit) {
     LazyRow(
-        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         items(LibraryTab.entries) { tab ->
-            MushiButton(
-                onClick = { onTabSelected(tab) },
-                style = if (state.currentTab == tab) MillenniumButtonStyle.Primary else MillenniumButtonStyle.Secondary
-            ) { Text(stringResource(tab.titleResource)) }
+            com.mushi.app.core.ui.component.MushiFilterChip(
+                label = stringResource(tab.titleResource),
+                selected = state.currentTab == tab,
+                onClick = { onTabSelected(tab) })
         }
     }
 }

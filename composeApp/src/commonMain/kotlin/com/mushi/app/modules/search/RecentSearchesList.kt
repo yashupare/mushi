@@ -54,6 +54,11 @@ import com.mushi.app.generated.resources.Res
 import com.mushi.app.generated.resources.search_recent_clear
 import com.mushi.app.generated.resources.search_recent_remove
 import com.mushi.app.generated.resources.search_recent_title
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.foundation.layout.offset
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.AsyncImage
 
 /**
  * What Search shows before anything is typed: the recent searches as a plain list under a
@@ -66,6 +71,8 @@ internal fun RecentSearchesList(
     onRemove: (String) -> Unit,
     onClearAll: () -> Unit,
     onCategoryClick: (String) -> Unit,
+    categoryCovers: Map<String, String>,
+    onCategoryShown: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -161,9 +168,11 @@ internal fun RecentSearchesList(
             ) {
                 row.forEach { (resource, color) ->
                     val name = stringResource(resource)
+                    LaunchedEffect(name) { onCategoryShown(name) }
                     BrowseCategoryTile(
                         name = name,
                         color = color,
+                        coverUrl = categoryCovers[name],
                         onClick = { onCategoryClick(name) },
                         modifier = Modifier.weight(1f))
                 }
@@ -195,6 +204,7 @@ private val BrowseCategories: List<Pair<StringResource, Color>> = listOf(
 private fun BrowseCategoryTile(
     name: String,
     color: Color,
+    coverUrl: String?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -206,8 +216,20 @@ private fun BrowseCategoryTile(
             .clip(shape)
             .background(Brush.linearGradient(listOf(color, color.copy(alpha = 0.72f))))
             .clickable(onClick = onClick)
-            .padding(14.dp)
     ) {
+        if (coverUrl != null) {
+            // Tilted and part way off the corner; the tile's clip cuts off the rest.
+            AsyncImage(
+                model = coverUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .offset(x = 12.dp, y = 8.dp)
+                    .size(64.dp)
+                    .rotate(25f)
+                    .clip(RoundedCornerShape(6.dp)))
+        }
         Text(
             text = name,
             style = AppTheme.typography.titleMedium,
@@ -215,6 +237,6 @@ private fun BrowseCategoryTile(
             color = Color.White,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.align(Alignment.TopStart))
+            modifier = Modifier.align(Alignment.TopStart).padding(14.dp))
     }
 }

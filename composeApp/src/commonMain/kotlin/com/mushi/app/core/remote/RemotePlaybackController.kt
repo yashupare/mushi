@@ -106,6 +106,21 @@ class RemotePlaybackController(
     private val _events = MutableSharedFlow<String>(extraBufferCapacity = 8)
     val events: SharedFlow<String> = _events.asSharedFlow()
 
+    private val _queueAdds = MutableSharedFlow<QueueAdd>(extraBufferCapacity = 8)
+
+    /** Single tracks added to this device's queue, so the shell can confirm and offer undo. */
+    val queueAdds: SharedFlow<QueueAdd> = _queueAdds.asSharedFlow()
+
+    fun undoQueueAdd(added: QueueAdd.Added) {
+        scope.launch {
+            try {
+                audioPlayerQueue.removeFromQueue(added.entry)
+            } catch (e: Exception) {
+                logger.e(e) { "Failed to undo adding to the queue" }
+            }
+        }
+    }
+
     /** Collection actions currently running locally; see [CollectionPlaybackKey]. */
     private val _busyCollections = MutableStateFlow<Set<CollectionPlaybackKey>>(emptySet())
     val busyCollections: StateFlow<Set<CollectionPlaybackKey>> = _busyCollections.asStateFlow()
@@ -332,7 +347,8 @@ class RemotePlaybackController(
                     }
 
                     PlaybackDestinationAction.AddToQueue -> {
-                        audioPlayerQueue.addToQueue(entry)
+                        _queueAdds.emit(
+                            addTrackOnce(audioPlayerQueue.getQueue(), request.track, audioPlayerQueue::addToQueue))
                     }
 
                     PlaybackDestinationAction.PlayNext -> {

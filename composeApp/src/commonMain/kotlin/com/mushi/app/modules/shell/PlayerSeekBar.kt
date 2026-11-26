@@ -56,6 +56,9 @@ internal fun PlayerSeekBar(
     modifier: Modifier = Modifier,
     timeStyle: TextStyle = AppTheme.typography.labelSmall,
     timesTopPadding: Dp = 0.dp,
+    /** A running clock in seconds; given one, the played part is drawn as a wave. */
+    wave: State<Float>? = null,
+    waving: Boolean = false,
 ) {
     var dragProgress by remember { mutableFloatStateOf(0f) }
     var isDragging by remember { mutableStateOf(false) }
@@ -75,24 +78,40 @@ internal fun PlayerSeekBar(
     }
     val canSeek = seekDuration.inWholeMilliseconds > 0L
 
+    val onDrag: (Float) -> Unit = {
+        dragProgress = it
+        isDragging = true
+    }
+    val onDragFinished: () -> Unit = {
+        isDragging = false
+        if (canSeek) {
+            pendingSeek = dragProgress
+            onSeek((seekDuration.inWholeMilliseconds * dragProgress.coerceIn(0f, 1f)).toLong().milliseconds)
+        }
+    }
+
     Column(modifier) {
-        MillenniumSlider(
-            value = shownProgress,
-            onValueChange = {
-                dragProgress = it
-                isDragging = true
-            },
-            onValueChangeFinished = {
-                isDragging = false
-                if (canSeek) {
-                    pendingSeek = dragProgress
-                    onSeek((seekDuration.inWholeMilliseconds * dragProgress.coerceIn(0f, 1f)).toLong().milliseconds)
-                }
-            },
-            enabled = canSeek,
-            label = stringResource(Res.string.player_seek_label),
-            modifier = Modifier.fillMaxWidth()
-        )
+        if (wave == null) {
+            MillenniumSlider(
+                value = shownProgress,
+                onValueChange = onDrag,
+                onValueChangeFinished = onDragFinished,
+                enabled = canSeek,
+                label = stringResource(Res.string.player_seek_label),
+                modifier = Modifier.fillMaxWidth()
+            )
+        } else {
+            WavySlider(
+                value = shownProgress,
+                onValueChange = onDrag,
+                onValueChangeFinished = onDragFinished,
+                enabled = canSeek,
+                label = stringResource(Res.string.player_seek_label),
+                wave = wave,
+                waving = waving && !isDragging,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
         Row(
             modifier = Modifier.fillMaxWidth().padding(top = timesTopPadding),
             horizontalArrangement = Arrangement.SpaceBetween,

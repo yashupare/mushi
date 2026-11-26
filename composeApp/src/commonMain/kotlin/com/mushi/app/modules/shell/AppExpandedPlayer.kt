@@ -158,6 +158,11 @@ import com.mushi.app.generated.resources.player_seek_label
 import com.mushi.app.generated.resources.player_sleep_timer
 import com.mushi.app.generated.resources.player_track_details
 import com.mushi.app.generated.resources.queue_title
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 
 // The expanded player on small screens
 // on the top left it has a angle/chevron down that can be used to collapse the player back to the
@@ -254,6 +259,13 @@ fun AppExpandedPlayer(
         label = "player_art_scale")
 
     val haptics = com.mushi.app.core.ui.rememberHaptics()
+    val reduceMotion = com.mushi.app.core.ui.LocalReduceMotion.current
+    val queue by audioPlayerQueue.queueFlow.collectAsStateWithLifecycle(emptyList())
+    val coverSlide = remember { CoverSlideDirection() }
+    val slideDirection = coverSlide.onIndex(queue.indexOf(currentEntry), queue.size)
+    val like = rememberCurrentTrackLike(audioPlayerQueue, savedTracksViewModel)
+    val currentLike by androidx.compose.runtime.rememberUpdatedState(like)
+    val coverLike = remember { CoverLikeState() }
 
     fun onPlayPause() {
         haptics.tap()
@@ -541,11 +553,21 @@ fun AppExpandedPlayer(
                             onPrevious = ::onSkipPrevious
                         )
                         // Long press shows track details, like Apple Music's credits.
+                        // Double tap likes the track; it never takes a like away.
                         .pointerInput(Unit) {
-                            detectTapGestures(onLongPress = {
-                                haptics.tap()
-                                playerOptionsViewModel.showTrackDetails()
-                            })
+                            detectTapGestures(
+                                onLongPress = {
+                                    haptics.tap()
+                                    playerOptionsViewModel.showTrackDetails()
+                                },
+                                onDoubleTap = {
+                                    val track = currentLike
+                                    if (track.trackId != null && track.isKnown && !track.isPending) {
+                                        haptics.tap()
+                                        coverLike.play()
+                                        if (!track.isLiked) track.toggle()
+                                    }
+                                })
                         }
                         // Grow out of the mini player's cover: start at its position and size, end
                         // in place. Runs from the sheet's progress, so dragging scrubs it.
@@ -574,10 +596,17 @@ fun AppExpandedPlayer(
                         .clip(RoundedCornerShape(20.dp))
                         .background(AppTheme.colors.surfaceContainerHighest)
                 ) {
-                    // The cover fades into the next one when the track changes.
-                    androidx.compose.animation.Crossfade(
+                    // The next cover slides in from the side the queue is moving towards.
+                    androidx.compose.animation.AnimatedContent(
                         targetState = coverModel,
-                        animationSpec = tween(durationMillis = 420),
+                        transitionSpec = {
+                            val fade = fadeIn(tween(420)) togetherWith fadeOut(tween(420))
+                            if (reduceMotion) fade else {
+                                val way = slideDirection
+                                (slideInHorizontally(tween(420)) { it * way } + fadeIn(tween(420))) togetherWith
+                                    (slideOutHorizontally(tween(420)) { -it * way } + fadeOut(tween(420)))
+                            }
+                        },
                         label = "player_cover"
                     ) { model ->
                         AsyncImage(
@@ -587,6 +616,7 @@ fun AppExpandedPlayer(
                             contentScale = ContentScale.Crop
                         )
                     }
+                    CoverLikeBurst(coverLike, Modifier.fillMaxSize())
                 }
             }
 
@@ -631,7 +661,10 @@ fun AppExpandedPlayer(
                     displayDuration = playerUiState.displayDuration,
                     onSeek = ::onSeek,
                     timeStyle = AppTheme.typography.labelSmall.copy(fontFeatureSettings = "tnum"),
-                    timesTopPadding = 2.dp
+                    timesTopPadding = 2.dp,
+                    // Driven by the backdrop's clock, so it adds no frames and stops with it.
+                    wave = livingTime,
+                    waving = playerUiState.isPlaying && !reduceMotion
                 )
                 Row(
                     modifier = Modifier

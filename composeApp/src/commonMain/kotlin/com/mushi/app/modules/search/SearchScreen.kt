@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -315,26 +314,16 @@ fun SearchScreen(viewModel: SearchScreenViewModel = koinViewModel()) {
         remotePlaybackController.requestTracksPlayNext(tracks, searchResultsTitle)
     }
 
-    val titleState = com.mushi.app.core.ui.component.rememberLargeTitleState()
-
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MillenniumTheme.colors.background)
             .windowInsetsPadding(WindowInsets.statusBars)
-            .nestedScroll(titleState.connection)
     ) {
         if (!isExpanded) {
-            // The profile button on the right, then the large title that collapses on scroll.
-            androidx.compose.foundation.layout.Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(end = 8.dp),
-                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.End
+            com.mushi.app.core.ui.component.PageHeader(
+                title = stringResource(Res.string.nav_search)
             ) { com.mushi.app.core.ui.component.ProfileButton() }
-            com.mushi.app.core.ui.component.LargeTitle(
-                text = stringResource(Res.string.nav_search),
-                state = titleState)
             SearchBar(
                 query = state.query,
                 onQueryChange = viewModel::onQueryChange,
@@ -404,7 +393,10 @@ fun SearchScreen(viewModel: SearchScreenViewModel = koinViewModel()) {
                 }
 
                 state.query.isBlank() -> {
+                    val categoryCovers by viewModel.categoryCovers.collectAsStateWithLifecycle()
                     RecentSearchesList(
+                        categoryCovers = categoryCovers,
+                        onCategoryShown = viewModel::loadCategoryCover,
                         searches = state.recentSearches,
                         onSearchClick = { search ->
                             viewModel.applyRecentSearch(search)
@@ -620,17 +612,10 @@ private fun SearchTabs(
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         items(types) { type ->
-            val isSelected = selectedType == type
-            MushiButton(
-                onClick = { onTabSelected(type) },
-                style = if (isSelected) {
-                    MillenniumButtonStyle.Primary
-                } else {
-                    MillenniumButtonStyle.Secondary
-                }
-            ) {
-                Text(type.tabTitle())
-            }
+            com.mushi.app.core.ui.component.MushiFilterChip(
+                label = type.tabTitle(),
+                selected = selectedType == type,
+                onClick = { onTabSelected(type) })
         }
     }
 }

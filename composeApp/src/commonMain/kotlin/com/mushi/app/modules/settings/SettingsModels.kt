@@ -5,11 +5,16 @@ import org.spotube.plugin_interfaces.plugin_apis.audio.AudioQuality
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.spotube.millennium.theme.MillenniumPalette
+import androidx.compose.ui.text.intl.Locale
 
 @Serializable
 enum class Theme {
     LIGHT, DARK, SYSTEM
 }
+
+/** The country for the device's region code, such as "IN"; the US when it names none. */
+internal fun countryFor(region: String): CountryCode =
+    CountryCode.entries.firstOrNull { it.code.equals(region, ignoreCase = true) } ?: CountryCode.US
 
 @Serializable
 data class UserSettings(
@@ -18,7 +23,7 @@ data class UserSettings(
     // it had no effect, so reading it would force English on existing users.
     @SerialName("appLanguage")
     val language: SupportedLanguages = SupportedLanguages.SYSTEM,
-    val country: CountryCode = CountryCode.BD,
+    val country: CountryCode = countryFor(Locale.current.region),
 
     // Appearance
     val theme: Theme = Theme.DARK,

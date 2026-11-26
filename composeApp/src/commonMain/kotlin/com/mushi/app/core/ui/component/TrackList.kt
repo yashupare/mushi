@@ -249,6 +249,15 @@ fun TrackList(
     val useDropdownForOptions = isDesktop && !isCompact
 
     val trackRow: @Composable (Int, MetadataTrack) -> Unit = { displayedIndex, track ->
+        androidx.compose.runtime.key(track.id) {
+        com.mushi.app.core.ui.SwipeToQueue(
+            enabled = !isDesktop && !isSelectionMode && !trackOptionsState(track).isBlacklisted,
+            onQueue = {
+                onTrackOptionsAction(
+                    track,
+                    if (isJamGuest) TrackOptionsAction.AddToJam else TrackOptionsAction.AddToQueue)
+            }
+        ) {
         TrackListRow(
             index = displayedIndex + 1,
             track = track,
@@ -303,6 +312,8 @@ fun TrackList(
             onArtistClick = onArtistClick,
             onAlbumClick = onAlbumClick,
             onArtistsOverflowClick = { onArtistsOverflowClick(track) })
+        }
+        }
     }
 
     // Shimmer, error, empty and next-page rows at the end of the card.

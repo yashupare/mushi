@@ -15,7 +15,6 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
@@ -26,7 +25,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -90,6 +88,7 @@ import org.jetbrains.compose.resources.Font
 import org.spotube.millennium.adaptive.WindowBreakpoints
 import com.mushi.app.resources.iconsax.IconsaxMirrorScreenRegular
 import com.mushi.app.generated.resources.cookie_regular
+import com.mushi.app.isDesktop
 
 @Composable
 fun HomeScreen(viewModel: HomeScreenViewModel) {
@@ -128,8 +127,6 @@ fun HomeScreen(viewModel: HomeScreenViewModel) {
             }
     }
 
-    val titleState = com.mushi.app.core.ui.component.rememberLargeTitleState()
-
     // A wash of the first cover's colour behind the greeting, fading out as the page scrolls.
     val washSource = (state as? HomeScreenState.Data)?.featuredItems
         ?.firstNotNullOfOrNull { it.asQuickPick()?.imageUrl }
@@ -162,46 +159,32 @@ fun HomeScreen(viewModel: HomeScreenViewModel) {
                         alpha = visible)
                 }
             }
-            .nestedScroll(titleState.connection)
     ) {
-        ApplicationMainBar(
-            backButton = false,
-            title = {
-                if (isSmallScreen) {
-                    // The small title only appears once the large one has scrolled away.
-                    Text(
-                        greeting,
-                        style = AppTheme.typography.titleMedium,
-                        color = AppTheme.colors.onSurface,
-                        modifier = Modifier.graphicsLayer { alpha = titleState.fraction }
-                    )
-                } else {
-                    Text(greeting)
-                }
-
-            },
-            actions = {
-                if (isSmallScreen) {
-                    // Devices and Group Jam now live at the top of Settings.
-                    val supportLabel = stringResource(Res.string.support_button_label)
-                    if (com.mushi.app.core.AppEdition.UPSTREAM_LINKS_ENABLED) {
-                        MillenniumIconButton(
-                            onClick = openSupport,
-                            style = MillenniumIconButtonStyle.Quiet
-                        ) {
-                            MillenniumIcon(
-                                imageVector = Iconsax.IconsaxHeart2,
-                                contentDescription = supportLabel
-                            )
-                        }
+        val headerActions: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit = {
+            if (isSmallScreen) {
+                // Devices and Group Jam now live at the top of Settings.
+                val supportLabel = stringResource(Res.string.support_button_label)
+                if (com.mushi.app.core.AppEdition.UPSTREAM_LINKS_ENABLED) {
+                    MillenniumIconButton(
+                        onClick = openSupport,
+                        style = MillenniumIconButtonStyle.Quiet
+                    ) {
+                        MillenniumIcon(
+                            imageVector = Iconsax.IconsaxHeart2,
+                            contentDescription = supportLabel
+                        )
                     }
-                    com.mushi.app.core.ui.component.ProfileButton()
                 }
-            })
-        if (isSmallScreen) {
-            com.mushi.app.core.ui.component.LargeTitle(
-                text = greeting,
-                state = titleState)
+                com.mushi.app.core.ui.component.ProfileButton()
+            }
+        }
+        if (isSmallScreen && !getPlatform().isDesktop()) {
+            com.mushi.app.core.ui.component.PageHeader(title = greeting, actions = headerActions)
+        } else {
+            ApplicationMainBar(
+                backButton = false,
+                title = { Text(greeting) },
+                actions = headerActions)
         }
         if (isSmallScreen) {
             ConnectStatusBanner(
@@ -266,7 +249,7 @@ private fun HomeContent(
         state = listState,
         modifier = Modifier.fillMaxSize(),
         contentPadding = contentPadding,
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+        verticalArrangement = Arrangement.spacedBy(32.dp)
     ) {
         when (state) {
             is HomeScreenState.Loading -> {
@@ -362,20 +345,23 @@ private fun HomeSection(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        if (!subtitle.isNullOrEmpty()) Text(
-            text = subtitle,
-            style = AppTheme.typography.labelMedium.copy(
-                color = AppTheme.colors.secondary,
-                fontWeight = FontWeight.Medium
-            ),
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
-        Text(
-            text = title,
-            style = AppTheme.typography.titleLarge,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(horizontal = 16.dp).offset(y = (-12).dp)
-        )
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            if (!subtitle.isNullOrEmpty()) Text(
+                text = subtitle,
+                style = AppTheme.typography.labelMedium.copy(
+                    color = AppTheme.colors.secondary,
+                    fontWeight = FontWeight.Medium
+                )
+            )
+            Text(
+                text = title,
+                style = AppTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
 
         LazyRow(
             state = rowState,
@@ -412,32 +398,10 @@ private fun GenreTabs(
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         items(genres) { genre ->
-            val selected = selectedGenreId == genre.id
-            val haptics = com.mushi.app.core.ui.rememberHaptics()
-            // Flat pill: the selected one inverts (dark on light, light on dark) so it reads
-            // at a glance, the rest sit quietly on a faint tint.
-            Box(
-                modifier = Modifier
-                    .height(36.dp)
-                    .clip(RoundedCornerShape(18.dp))
-                    .background(
-                        if (selected) AppTheme.colors.onSurface
-                        else AppTheme.colors.onSurface.copy(alpha = 0.08f))
-                    .clickable {
-                        if (!selected) haptics.tick()
-                        onGenreSelected(genre.id)
-                    }
-                    .padding(horizontal = 16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = genre.name,
-                    style = AppTheme.typography.bodyMedium,
-                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
-                    color = if (selected) AppTheme.colors.surface else AppTheme.colors.onSurface,
-                    maxLines = 1
-                )
-            }
+            com.mushi.app.core.ui.component.MushiFilterChip(
+                label = genre.name,
+                selected = selectedGenreId == genre.id,
+                onClick = { onGenreSelected(genre.id) })
         }
     }
 }

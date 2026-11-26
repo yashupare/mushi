@@ -160,6 +160,10 @@ internal fun flatComponents(
             background = SolidColor(tint(c, 0.08f)),
             shape = RoundedCornerShape(12.dp),
             textStyle = type.bodyLarge,
+            // The library's own defaults carry no font family, so set every style.
+            placeholderStyle = type.bodyLarge,
+            labelStyle = type.labelMedium,
+            errorStyle = type.bodySmall,
             foreground = c.text,
             placeholderColor = c.muted,
             cursorColor = c.accent,

@@ -230,7 +230,7 @@ fun CollectionDetails(
                         if (isCompact) {
                             // A large cover with a soft shadow, like a record sleeve.
                             Modifier
-                                .fillMaxWidth(0.72f)
+                                .fillMaxWidth(0.52f)
                                 .aspectRatio(1f)
                                 .shadow(elevation = 20.dp, shape = RoundedCornerShape(12.dp))
                         } else {

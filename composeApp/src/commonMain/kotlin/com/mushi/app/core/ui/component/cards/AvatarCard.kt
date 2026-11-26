@@ -46,8 +46,7 @@ fun AvatarCard(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(CircleShape)
-                    .padding(12.dp),
+                    .clip(CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 MediaArtwork(
@@ -63,7 +62,7 @@ fun AvatarCard(
                 )
             }
             Column(
-                modifier = Modifier.fillMaxWidth().padding(12.dp)
+                modifier = Modifier.fillMaxWidth().padding(start = 2.dp, top = 10.dp, end = 2.dp, bottom = 4.dp)
             ) {
                 TextWithShimmer(
                     text = title,

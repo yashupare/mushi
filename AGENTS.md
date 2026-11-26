@@ -74,7 +74,7 @@
 - Build a release APK without a release key: `:composeApp:assembleStableRelease` produces an unsigned APK; zipalign it and sign it with the debug keystore (`apksigner sign --ks ~/.android/debug.keystore --ks-pass pass:android`) to install it over a debug install.
 - The emulator used here only has the `hpet` clocksource, so every clock read traps to the hypervisor (~30-40% of main-thread samples). Frame-time numbers on it are inflated and noisy; compare builds A/B, interleaved, after a fresh boot with load settled.
 - Fast-changing playback state (position, progress) must not be part of `PlayerUiState`: it ticks 4x/s and the full player stays composed while collapsed. Read it from `rememberPlayerPosition` inside small leaf composables (`PlayerSeekBar`, `MiniPlayerProgress`), ideally only while drawing.
-- Continuous animations must stop when off screen (the full player gates them on `LocalPlayerTransition`). Regression check: `scripts/perf/idle-playing-frames.sh` (expected ~40 frames in 10 s while playing idle).
+- Continuous animations must stop when off screen (the full player gates them on `LocalPlayerTransition`). Regression check: `scripts/perf/idle-playing-frames.sh` (expected ~40 frames in 10 s while playing idle, ~80 when the playing album or playlist is on screen with its `NowPlayingBadge`).
 - A Baseline Profile lives in `composeApp/src/androidMain/baselineProfiles/` (registered in `android { sourceSets }`, since the KMP plugin does not map it); `profileinstaller` applies it on sideloaded installs. CPU profiling of a release build needs a temporary `<profileable android:shell="true" />` in the manifest; never commit it.
 
 ## Current testing reality

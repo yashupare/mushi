@@ -469,8 +469,6 @@
     <string name="devices_error_connection_failed">接続に失敗しました</string>
     <string name="devices_error_connection_lost">接続が切断されました</string>
     <string name="devices_error_send_failed">送信に失敗しました</string>
-    <string name="devices_error_discovery_failed">検出に失敗しました: %1$s</string>
-    <string name="devices_error_connect_failed">接続できませんでした: %1$s</string>
 
     <!-- Devices: discovery screen -->
     <string name="devices_title">デバイス</string>
@@ -581,11 +579,6 @@
 
     <!-- Error display -->
     <string name="error_title">申し訳ありません</string>
-    <string name="error_description">現在、一部の機能が正しく動作していません。ご不便をおかけして申し訳ありません。解決に全力で取り組んでいます。もう一度お試しいただくか、下のエラー詳細をご確認ください。</string>
-    <string name="error_details">エラーの詳細</string>
-    <string name="error_copy_to_clipboard">クリップボードにコピー</string>
-    <string name="error_view_full_log">ログ全体を表示</string>
-    <string name="error_full_log_title">エラーログ全体</string>
 
     <!-- Collection details -->
     <string name="collection_details_shuffle">シャッフル</string>

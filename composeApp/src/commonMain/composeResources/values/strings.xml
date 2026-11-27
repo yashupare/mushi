@@ -327,6 +327,11 @@
     <string name="settings_desktop_discord_title">Discord rich presence</string>
     <string name="settings_desktop_discord_subtitle">Show your current playback status in Discord on desktop.</string>
 
+    <string name="settings_updates_check_title">Check for updates</string>
+    <string name="settings_updates_current_version">You have version %1$s</string>
+    <string name="settings_updates_checking">Checking…</string>
+    <string name="settings_updates_up_to_date">Version %1$s is the latest</string>
+    <string name="settings_updates_check_failed">Couldn’t check. Try again.</string>
     <string name="settings_updates_auto_check_title">Automatically check for updates</string>
     <string name="settings_updates_auto_check_subtitle">Look for new Mushi releases in the background.</string>
 
@@ -615,6 +620,14 @@
     <string name="update_action_ignore">Ignore</string>
     <string name="update_action_update">Update</string>
     <string name="app_update_dialog_title">Mushi %1$s is available</string>
+    <string name="app_update_permission">Android needs your permission once: allow Mushi to install apps (choose “Always allow” if asked), come back, then tap Update.</string>
+    <string name="app_update_downloading">Downloading the update…</string>
+    <string name="app_update_ready">The update is ready. Installing closes Mushi, so the music will stop.</string>
+    <string name="app_update_installing">Installing. Mushi will close; open it again when it’s done.</string>
+    <string name="app_update_failed">The update couldn’t be installed. Try again, or download it from the website.</string>
+    <string name="app_update_install_now">Install now</string>
+    <string name="app_update_later">Later</string>
+    <string name="app_update_website">Website</string>
     <string name="app_update_dialog_no_notes">See what’s new in this release on the Mushi downloads page.</string>
     <string name="plugin_update_dialog_title">%1$s %2$s is available</string>
     <string name="plugin_update_dialog_current_version">Currently installed: %1$s</string>
@@ -745,8 +758,8 @@
     <string name="devices_error_connection_lost">Connection lost</string>
     <string name="devices_error_connection_denied">The other device declined the request, or has remote control turned off.</string>
     <string name="devices_error_send_failed">Send failed</string>
-    <string name="devices_error_discovery_failed">Discovery failed: %1$s</string>
-    <string name="devices_error_connect_failed">Failed to connect: %1$s</string>
+    <string name="devices_error_discovery_failed">Discovery failed</string>
+    <string name="devices_error_connect_failed">Failed to connect</string>
 
     <!-- Devices: discovery screen -->
     <string name="devices_title">Devices</string>
@@ -908,11 +921,11 @@
 
     <!-- Error display -->
     <string name="error_title">Something went wrong</string>
-    <string name="error_description">We couldn't load this right now. Check your connection and try again. The technical details are below if you need them.</string>
-    <string name="error_details">Error Details</string>
-    <string name="error_copy_to_clipboard">Copy to clipboard</string>
-    <string name="error_view_full_log">View full log</string>
-    <string name="error_full_log_title">Full Error Log</string>
+    <string name="error_try_again">We couldn’t load this right now. Please try again.</string>
+    <string name="offline_title">You’re offline</string>
+    <string name="offline_description">Connect to the internet to load this. Your downloads and the songs on this device still play.</string>
+    <string name="offline_downloads">Downloads</string>
+    <string name="offline_local">Local tracks</string>
 
     <!-- Collection details -->
     <string name="collection_details_shuffle">Shuffle</string>

@@ -481,8 +481,6 @@
     <string name="devices_error_connection_failed">Не удалось подключиться</string>
     <string name="devices_error_connection_lost">Соединение потеряно</string>
     <string name="devices_error_send_failed">Не удалось отправить</string>
-    <string name="devices_error_discovery_failed">Ошибка поиска: %1$s</string>
-    <string name="devices_error_connect_failed">Не удалось подключиться: %1$s</string>
 
     <!-- Devices: discovery screen -->
     <string name="devices_title">Устройства</string>
@@ -596,11 +594,6 @@
 
     <!-- Error display -->
     <string name="error_title">Нам очень жаль</string>
-    <string name="error_description">Что-то пошло не так. Нам важно ваше впечатление, и мы делаем всё, чтобы это исправить. Попробуйте ещё раз или посмотрите подробности ошибки ниже.</string>
-    <string name="error_details">Подробности ошибки</string>
-    <string name="error_copy_to_clipboard">Копировать в буфер обмена</string>
-    <string name="error_view_full_log">Показать полный журнал</string>
-    <string name="error_full_log_title">Полный журнал ошибки</string>
 
     <!-- Collection details -->
     <string name="collection_details_shuffle">Перемешать</string>

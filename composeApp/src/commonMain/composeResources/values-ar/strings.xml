@@ -489,8 +489,6 @@
     <string name="devices_error_connection_failed">فشل الاتصال</string>
     <string name="devices_error_connection_lost">انقطع الاتصال</string>
     <string name="devices_error_send_failed">فشل الإرسال</string>
-    <string name="devices_error_discovery_failed">فشل الاكتشاف: %1$s</string>
-    <string name="devices_error_connect_failed">تعذّر الاتصال: %1$s</string>
 
     <!-- Devices: discovery screen -->
     <string name="devices_title">الأجهزة</string>
@@ -606,11 +604,6 @@
 
     <!-- Error display -->
     <string name="error_title">نعتذر بشدة</string>
-    <string name="error_description">هناك خلل ما في الوقت الحالي. تجربتك تهمنا، ونبذل قصارى جهدنا لإصلاح ذلك. يُرجى المحاولة مرة أخرى أو مراجعة تفاصيل الخطأ أدناه.</string>
-    <string name="error_details">تفاصيل الخطأ</string>
-    <string name="error_copy_to_clipboard">نسخ إلى الحافظة</string>
-    <string name="error_view_full_log">عرض السجل الكامل</string>
-    <string name="error_full_log_title">سجل الخطأ الكامل</string>
 
     <!-- Collection details -->
     <string name="collection_details_shuffle">ترتيب عشوائي</string>

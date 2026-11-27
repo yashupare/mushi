@@ -204,7 +204,6 @@ class PlayerOptionsViewModel(
                             trackDetails = PlayerTrackDetails(
                                 track = track,
                                 isLoading = false,
-                                error = error.message,
                                 errorRes = Res.string.player_track_details_load_failed))
                     } else current
                 }

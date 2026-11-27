@@ -469,8 +469,6 @@
     <string name="devices_error_connection_failed">Kết nối thất bại</string>
     <string name="devices_error_connection_lost">Mất kết nối</string>
     <string name="devices_error_send_failed">Gửi thất bại</string>
-    <string name="devices_error_discovery_failed">Tìm thiết bị thất bại: %1$s</string>
-    <string name="devices_error_connect_failed">Không thể kết nối: %1$s</string>
 
     <!-- Devices: discovery screen -->
     <string name="devices_title">Thiết bị</string>
@@ -581,11 +579,6 @@
 
     <!-- Error display -->
     <string name="error_title">Chúng tôi thật sự xin lỗi</string>
-    <string name="error_description">Đã có sự cố xảy ra. Trải nghiệm của bạn rất quan trọng với chúng tôi và chúng tôi đang cố gắng hết sức để khắc phục. Vui lòng thử lại hoặc xem chi tiết lỗi bên dưới.</string>
-    <string name="error_details">Chi tiết lỗi</string>
-    <string name="error_copy_to_clipboard">Sao chép vào bộ nhớ tạm</string>
-    <string name="error_view_full_log">Xem nhật ký đầy đủ</string>
-    <string name="error_full_log_title">Nhật ký lỗi đầy đủ</string>
 
     <!-- Collection details -->
     <string name="collection_details_shuffle">Phát ngẫu nhiên</string>

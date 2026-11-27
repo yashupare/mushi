@@ -477,8 +477,6 @@
     <string name="devices_error_connection_failed">Error de conexión</string>
     <string name="devices_error_connection_lost">Se perdió la conexión</string>
     <string name="devices_error_send_failed">Error al enviar</string>
-    <string name="devices_error_discovery_failed">Error al buscar dispositivos: %1$s</string>
-    <string name="devices_error_connect_failed">No se pudo conectar: %1$s</string>
 
     <!-- Devices: discovery screen -->
     <string name="devices_title">Dispositivos</string>
@@ -591,11 +589,6 @@
 
     <!-- Error display -->
     <string name="error_title">Lo sentimos de verdad</string>
-    <string name="error_description">Algo no funciona bien en este momento. Tu experiencia nos importa y estamos haciendo todo lo posible para solucionarlo. Inténtalo de nuevo o consulta los detalles del error a continuación.</string>
-    <string name="error_details">Detalles del error</string>
-    <string name="error_copy_to_clipboard">Copiar al portapapeles</string>
-    <string name="error_view_full_log">Ver registro completo</string>
-    <string name="error_full_log_title">Registro de errores completo</string>
 
     <!-- Collection details -->
     <string name="collection_details_shuffle">Aleatorio</string>

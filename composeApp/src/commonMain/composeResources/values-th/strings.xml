@@ -469,8 +469,6 @@
     <string name="devices_error_connection_failed">การเชื่อมต่อล้มเหลว</string>
     <string name="devices_error_connection_lost">การเชื่อมต่อขาดหาย</string>
     <string name="devices_error_send_failed">ส่งไม่สำเร็จ</string>
-    <string name="devices_error_discovery_failed">การค้นหาล้มเหลว: %1$s</string>
-    <string name="devices_error_connect_failed">เชื่อมต่อไม่สำเร็จ: %1$s</string>
 
     <!-- Devices: discovery screen -->
     <string name="devices_title">อุปกรณ์</string>
@@ -581,11 +579,6 @@
 
     <!-- Error display -->
     <string name="error_title">ขออภัยเป็นอย่างยิ่ง</string>
-    <string name="error_description">มีบางอย่างทำงานไม่ถูกต้องในขณะนี้ ประสบการณ์ของคุณสำคัญสำหรับเรา และเรากำลังพยายามแก้ไขอย่างเต็มที่ โปรดลองอีกครั้งหรือตรวจสอบรายละเอียดข้อผิดพลาดด้านล่าง</string>
-    <string name="error_details">รายละเอียดข้อผิดพลาด</string>
-    <string name="error_copy_to_clipboard">คัดลอกไปยังคลิปบอร์ด</string>
-    <string name="error_view_full_log">ดูบันทึกทั้งหมด</string>
-    <string name="error_full_log_title">บันทึกข้อผิดพลาดทั้งหมด</string>
 
     <!-- Collection details -->
     <string name="collection_details_shuffle">สุ่มเพลง</string>

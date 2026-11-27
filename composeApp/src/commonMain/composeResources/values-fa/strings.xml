@@ -473,8 +473,6 @@
     <string name="devices_error_connection_failed">اتصال ناموفق بود</string>
     <string name="devices_error_connection_lost">اتصال قطع شد</string>
     <string name="devices_error_send_failed">ارسال ناموفق بود</string>
-    <string name="devices_error_discovery_failed">یافتن دستگاه‌ها ناموفق بود: %1$s</string>
-    <string name="devices_error_connect_failed">اتصال ناموفق بود: %1$s</string>
 
     <!-- Devices: discovery screen -->
     <string name="devices_title">دستگاه‌ها</string>
@@ -586,11 +584,6 @@
 
     <!-- Error display -->
     <string name="error_title">واقعاً متأسفیم</string>
-    <string name="error_description">در حال حاضر چیزی درست کار نمی‌کند. تجربهٔ شما برای ما مهم است و تمام تلاشمان را برای رفع آن می‌کنیم. لطفاً دوباره تلاش کنید یا جزئیات خطا را در پایین بررسی کنید.</string>
-    <string name="error_details">جزئیات خطا</string>
-    <string name="error_copy_to_clipboard">کپی در کلیپ‌بورد</string>
-    <string name="error_view_full_log">مشاهدهٔ گزارش کامل</string>
-    <string name="error_full_log_title">گزارش کامل خطا</string>
 
     <!-- Collection details -->
     <string name="collection_details_shuffle">پخش تصادفی</string>

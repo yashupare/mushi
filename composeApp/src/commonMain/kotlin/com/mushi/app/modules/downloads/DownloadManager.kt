@@ -1,5 +1,7 @@
 package com.mushi.app.modules.downloads
 
+import com.mushi.app.core.network.isNetworkError
+import com.mushi.app.generated.resources.offline_title
 import com.mushi.app.core.network.HttpClientFactory
 import co.touchlab.kermit.Logger
 import org.spotube.plugin_interfaces.plugin_apis.metadata.track.MetadataTrack
@@ -283,12 +285,14 @@ class DownloadManager(
             throw e
         } catch (e: Exception) {
             logger.e(e) { "[Download ${item.id}] FAILED '${item.title}': ${e.message}" }
-            val failureMessage = e.message ?: getString(Res.string.common_unknown_error)
+            val failureMessage =
+                if (isNetworkError(e.toString())) getString(Res.string.offline_title)
+                else e.message ?: getString(Res.string.common_unknown_error)
             downloadsMap.update { map ->
                 map[item.id]?.let {
                     map + (item.id to it.copy(
                         status = DownloadStatus.Failed(failureMessage),
-                        errorMessage = e.message))
+                        errorMessage = failureMessage))
                 } ?: map
             }
         } finally {

@@ -8,7 +8,20 @@ import net.swiftzer.semver.SemVer
 internal data class GitHubRelease(
     @SerialName("tag_name") val tagName: String,
     val body: String? = null,
-    val draft: Boolean = false)
+    val draft: Boolean = false,
+    val assets: List<ReleaseAsset> = emptyList()) {
+
+    /** The Android package attached to this release, if any. */
+    fun apk(): UpdatePackage? = assets.firstOrNull { it.name.endsWith(".apk", ignoreCase = true) }
+        ?.let { UpdatePackage(it.url, it.size, it.digest) }
+}
+
+@Serializable
+internal data class ReleaseAsset(
+    val name: String,
+    @SerialName("browser_download_url") val url: String,
+    val size: Long = 0,
+    val digest: String? = null)
 
 /**
  * Picks the release to offer from GitHub's release list using full SemVer 2.0.0 precedence

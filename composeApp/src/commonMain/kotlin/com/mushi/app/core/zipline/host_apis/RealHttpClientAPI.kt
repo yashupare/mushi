@@ -23,18 +23,8 @@ class RealHttpClientAPI : HttpClientAPI, KoinComponent {
         requestHeaders: Map<String, String>?,
         body: String?
     ): HttpResponse {
-        logger.i {
-            buildString {
-                append("[${method.name.uppercase()}] $url\n")
-                append("Headers:\n")
-                requestHeaders?.forEach { (key, value) ->
-                    append("  $key: $value\n")
-                }
-                body?.let {
-                    append("Body: $it\n")
-                }
-            }
-        }
+        // Headers, bodies and query strings carry the listener's sign-in, so none of them is logged
+        logger.i { "[${method.name.uppercase()}] ${url.substringBefore('?').substringBefore('#')}" }
         val res = httpClient.request {
             this.method = when (method) {
                 HttpMethod.Get -> io.ktor.http.HttpMethod.Get

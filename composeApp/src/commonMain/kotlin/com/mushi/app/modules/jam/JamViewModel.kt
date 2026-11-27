@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.snapshotFlow
 import com.mushi.app.PlatformType
+import com.mushi.app.core.jam.JamRoomException
 import com.mushi.app.core.jam.JamParticipant
 import com.mushi.app.core.jam.JamRole
 import com.mushi.app.core.jam.JamRoomCode
@@ -163,7 +164,7 @@ class JamViewModel(
             try {
                 jamRoomService.createRoom()
                     .onFailure { e ->
-                        _localError.value = e.message ?: getString(Res.string.jam_error_create)
+                        _localError.value = e.ownMessage() ?: getString(Res.string.jam_error_create)
                     }
                     .onSuccess { _localError.value = null }
             } finally {
@@ -202,7 +203,7 @@ class JamViewModel(
             try {
                 jamRoomService.joinRoom(code)
                     .onFailure { e ->
-                        _localError.value = e.message ?: getString(Res.string.jam_error_join)
+                        _localError.value = e.ownMessage() ?: getString(Res.string.jam_error_join)
                     }
                     .onSuccess { _localError.value = null }
             } finally {
@@ -253,4 +254,10 @@ class JamViewModel(
     fun showParticipantMenu(participantId: String?) {
         participantMenu.value = participantId
     }
+}
+
+/** The message when Mushi wrote it for the listener; anything else is internal text. */
+internal fun Throwable.ownMessage(): String? = when (this) {
+    is JamRoomException, is IllegalStateException, is IllegalArgumentException -> message
+    else -> null
 }

@@ -473,8 +473,6 @@
     <string name="devices_error_connection_failed">Verbinding mislukt</string>
     <string name="devices_error_connection_lost">Verbinding verbroken</string>
     <string name="devices_error_send_failed">Verzenden mislukt</string>
-    <string name="devices_error_discovery_failed">Zoeken mislukt: %1$s</string>
-    <string name="devices_error_connect_failed">Verbinden mislukt: %1$s</string>
 
     <!-- Devices: discovery screen -->
     <string name="devices_title">Apparaten</string>
@@ -586,11 +584,6 @@
 
     <!-- Error display -->
     <string name="error_title">Het spijt ons echt</string>
-    <string name="error_description">Er werkt momenteel iets niet goed. Jouw ervaring is belangrijk voor ons en we doen ons best om dit op te lossen. Probeer het opnieuw of bekijk de foutdetails hieronder.</string>
-    <string name="error_details">Foutdetails</string>
-    <string name="error_copy_to_clipboard">Kopiëren naar klembord</string>
-    <string name="error_view_full_log">Volledig logboek bekijken</string>
-    <string name="error_full_log_title">Volledig foutenlogboek</string>
 
     <!-- Collection details -->
     <string name="collection_details_shuffle">Shuffle</string>

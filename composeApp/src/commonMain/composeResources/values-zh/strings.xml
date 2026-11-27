@@ -469,8 +469,6 @@
     <string name="devices_error_connection_failed">连接失败</string>
     <string name="devices_error_connection_lost">连接已断开</string>
     <string name="devices_error_send_failed">发送失败</string>
-    <string name="devices_error_discovery_failed">发现设备失败：%1$s</string>
-    <string name="devices_error_connect_failed">连接失败：%1$s</string>
 
     <!-- Devices: discovery screen -->
     <string name="devices_title">设备</string>
@@ -581,11 +579,6 @@
 
     <!-- Error display -->
     <string name="error_title">非常抱歉</string>
-    <string name="error_description">出了点问题。你的体验对我们很重要，我们正在全力修复。请重试，或查看下方的错误详情。</string>
-    <string name="error_details">错误详情</string>
-    <string name="error_copy_to_clipboard">复制到剪贴板</string>
-    <string name="error_view_full_log">查看完整日志</string>
-    <string name="error_full_log_title">完整错误日志</string>
 
     <!-- Collection details -->
     <string name="collection_details_shuffle">随机播放</string>

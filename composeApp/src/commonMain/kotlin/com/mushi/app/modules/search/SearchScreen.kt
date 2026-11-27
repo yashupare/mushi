@@ -35,7 +35,6 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -43,7 +42,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
@@ -119,6 +117,9 @@ import com.mushi.app.resources.iconsax.IconsaxSearchBroken
 import com.mushi.app.resources.iconsax.IconsaxTrash
 import com.mushi.app.resources.iconsax.InconsaxClock
 import com.mushi.app.generated.resources.Res
+import com.mushi.app.generated.resources.error_try_again
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.runtime.snapshotFlow
 import com.mushi.app.generated.resources.nav_search
 import com.mushi.app.generated.resources.library_tab_albums
 import com.mushi.app.generated.resources.library_tab_artists
@@ -325,8 +326,7 @@ fun SearchScreen(viewModel: SearchScreenViewModel = koinViewModel()) {
                 title = stringResource(Res.string.nav_search)
             ) { com.mushi.app.core.ui.component.ProfileButton() }
             SearchBar(
-                query = state.query,
-                onQueryChange = viewModel::onQueryChange,
+                state = viewModel.queryText,
                 // Recent searches live in the inline list under the field; the library's dropdown is off.
                 recentSearchSuggestions = emptyList(),
                 onRecentSearchClick = { search ->
@@ -354,8 +354,7 @@ fun SearchScreen(viewModel: SearchScreenViewModel = koinViewModel()) {
             ) {
                 if (isExpanded) {
                     SearchBar(
-                        query = state.query,
-                        onQueryChange = viewModel::onQueryChange,
+                        state = viewModel.queryText,
                         // Recent searches live in the inline list under the field; the library's dropdown is off.
                 recentSearchSuggestions = emptyList(),
                         onRecentSearchClick = { search ->
@@ -422,6 +421,7 @@ fun SearchScreen(viewModel: SearchScreenViewModel = koinViewModel()) {
                         users = state.users,
                         supportedSearchTypes = state.supportedSearchTypes,
                         onSeeAll = viewModel::onTabSelected,
+                        onRetry = viewModel::retry,
                         onTrackClick = ::playSingleTrack,
                         onTrackOptionsAction = ::handleTrackOptionsAction,
                         onTrackOptionsState = ::getTrackOptionsStateReactive,
@@ -456,6 +456,7 @@ fun SearchScreen(viewModel: SearchScreenViewModel = koinViewModel()) {
                         query = state.query,
                         tracks = state.tracks,
                         onLoadNextPage = viewModel::loadNextTracks,
+                        onRetry = viewModel::retry,
                         onTrackClick = ::playSingleTrack,
                         onTrackOptionsAction = ::handleTrackOptionsAction,
                         onTrackOptionsState = ::getTrackOptionsStateReactive,
@@ -490,6 +491,7 @@ fun SearchScreen(viewModel: SearchScreenViewModel = koinViewModel()) {
                         query = state.query,
                         playlists = state.playlists,
                         onLoadNextPage = viewModel::loadNextPlaylists,
+                        onRetry = viewModel::retry,
                         modifier = Modifier
                             .fillMaxSize()
                     )
@@ -500,6 +502,7 @@ fun SearchScreen(viewModel: SearchScreenViewModel = koinViewModel()) {
                         query = state.query,
                         albums = state.albums,
                         onLoadNextPage = viewModel::loadNextAlbums,
+                        onRetry = viewModel::retry,
                         modifier = Modifier
                             .fillMaxSize()
                     )
@@ -510,6 +513,7 @@ fun SearchScreen(viewModel: SearchScreenViewModel = koinViewModel()) {
                         query = state.query,
                         artists = state.artists,
                         onLoadNextPage = viewModel::loadNextArtists,
+                        onRetry = viewModel::retry,
                         modifier = Modifier
                             .fillMaxSize()
                     )
@@ -520,6 +524,7 @@ fun SearchScreen(viewModel: SearchScreenViewModel = koinViewModel()) {
                         query = state.query,
                         users = state.users,
                         onLoadNextPage = viewModel::loadNextUsers,
+                        onRetry = viewModel::retry,
                         modifier = Modifier
                             .fillMaxSize()
                     )
@@ -544,25 +549,13 @@ fun SearchScreen(viewModel: SearchScreenViewModel = koinViewModel()) {
 
 @Composable
 private fun SearchBar(
-    query: String,
-    onQueryChange: (String) -> Unit,
+    state: TextFieldState,
     recentSearchSuggestions: List<String>,
     onRecentSearchClick: (String) -> Unit,
     onClearAllRecentSearches: () -> Unit,
     onSubmit: () -> Unit = {}
 ) {
-    val hasRecentSearchSuggestions = recentSearchSuggestions.isNotEmpty()
-    val searchState = rememberTextFieldState(query)
     var hadFocus by remember { mutableStateOf(false) }
-
-    LaunchedEffect(searchState) {
-        snapshotFlow { searchState.text.toString() }.collect { onQueryChange(it) }
-    }
-    LaunchedEffect(query) {
-        if (searchState.text.toString() != query) {
-            searchState.edit { replace(0, length, query) }
-        }
-    }
 
     // The same flat field as everywhere else (the library's autocomplete draws its own glossy
     // focus ring that the theme can't turn off). Recent searches live in the list under it.
@@ -573,7 +566,7 @@ private fun SearchBar(
             .padding(bottom = 8.dp)
     ) {
         MillenniumTextField(
-            state = searchState,
+            state = state,
             label = "",
             placeholder = stringResource(Res.string.search_placeholder),
             modifier = Modifier
@@ -583,9 +576,9 @@ private fun SearchBar(
                     if (hadFocus && !focus.isFocused) onSubmit()
                     hadFocus = focus.isFocused
                 })
-        if (searchState.text.isNotEmpty()) {
+        if (state.text.isNotEmpty()) {
             MillenniumIconButton(
-                onClick = { searchState.edit { replace(0, length, "") } },
+                onClick = { state.edit { replace(0, length, "") } },
                 modifier = Modifier.align(Alignment.CenterEnd),
                 style = MillenniumIconButtonStyle.Quiet) {
                 MillenniumIcon(
@@ -630,6 +623,7 @@ private fun SearchAllTab(
     users: SearchPagedState<MetadataUser>,
     supportedSearchTypes: List<MetadataSupportedSearchType>,
     onSeeAll: (MetadataSupportedSearchType) -> Unit,
+    onRetry: () -> Unit,
     onTrackClick: (MetadataTrack) -> Unit,
     onTrackOptionsAction: (MetadataTrack, TrackOptionsAction) -> Unit,
     onTrackOptionsState: (MetadataTrack) -> TrackOptionsState,
@@ -667,7 +661,7 @@ private fun SearchAllTab(
     if (!hasAnyContent && !isLoadingAll && hasAnyError != null) {
         ErrorDisplay(
             errorMessage = hasAnyError,
-            onRetry = { },
+            onRetry = onRetry,
             modifier = modifier
         )
         return
@@ -718,7 +712,7 @@ private fun SearchAllTab(
                     TrackListSkeleton(count = 5)
                 }
                 if (tracks.error != null && tracks.items.isEmpty()) {
-                    SearchMessageInline(tracks.error, isError = true)
+                    SearchMessageInline(stringResource(Res.string.error_try_again), isError = true)
                 }
             }
         },
@@ -776,6 +770,7 @@ private fun SearchTracksTab(
     query: String,
     tracks: SearchPagedState<MetadataTrack>,
     onLoadNextPage: () -> Unit,
+    onRetry: () -> Unit,
     onTrackClick: (MetadataTrack) -> Unit,
     onTrackOptionsAction: (MetadataTrack, TrackOptionsAction) -> Unit,
     onTrackOptionsState: (MetadataTrack) -> TrackOptionsState,
@@ -801,7 +796,12 @@ private fun SearchTracksTab(
         modifier = modifier,
         skeleton = { TrackListSkeleton() }
     ) {
-    TrackList(
+    val failure = tracks.error
+    if (failure != null && tracks.items.isEmpty()) ErrorDisplay(
+        errorMessage = failure,
+        onRetry = onRetry,
+        modifier = Modifier.fillMaxSize())
+    else TrackList(
         tracks = tracks.items,
         error = tracks.error,
         hasMore = tracks.hasNextPage,
@@ -832,6 +832,7 @@ private fun SearchAlbumsTab(
     query: String,
     albums: SearchPagedState<MetadataAlbum.Basic>,
     onLoadNextPage: () -> Unit,
+    onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     SearchGridTab(
@@ -841,6 +842,7 @@ private fun SearchAlbumsTab(
         error = albums.error,
         hasNextPage = albums.hasNextPage,
         onLoadNextPage = onLoadNextPage,
+        onRetry = onRetry,
         emptyMessage = stringResource(Res.string.search_no_albums),
         modifier = modifier
     ) { album ->
@@ -853,6 +855,7 @@ private fun SearchArtistsTab(
     query: String,
     artists: SearchPagedState<MetadataArtist.Basic>,
     onLoadNextPage: () -> Unit,
+    onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     SearchGridTab(
@@ -862,6 +865,7 @@ private fun SearchArtistsTab(
         error = artists.error,
         hasNextPage = artists.hasNextPage,
         onLoadNextPage = onLoadNextPage,
+        onRetry = onRetry,
         emptyMessage = stringResource(Res.string.search_no_artists),
         modifier = modifier
     ) { artist ->
@@ -874,6 +878,7 @@ private fun SearchPlaylistsTab(
     query: String,
     playlists: SearchPagedState<MetadataPlaylist>,
     onLoadNextPage: () -> Unit,
+    onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     SearchGridTab(
@@ -883,6 +888,7 @@ private fun SearchPlaylistsTab(
         error = playlists.error,
         hasNextPage = playlists.hasNextPage,
         onLoadNextPage = onLoadNextPage,
+        onRetry = onRetry,
         emptyMessage = stringResource(Res.string.search_no_playlists),
         modifier = modifier
     ) { playlist ->
@@ -895,6 +901,7 @@ private fun SearchUsersTab(
     query: String,
     users: SearchPagedState<MetadataUser>,
     onLoadNextPage: () -> Unit,
+    onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     SearchGridTab(
@@ -904,6 +911,7 @@ private fun SearchUsersTab(
         error = users.error,
         hasNextPage = users.hasNextPage,
         onLoadNextPage = onLoadNextPage,
+        onRetry = onRetry,
         emptyMessage = stringResource(Res.string.search_no_users),
         modifier = modifier
     ) { user ->
@@ -920,6 +928,7 @@ private fun <T> SearchGridTab(
     error: String?,
     hasNextPage: Boolean,
     onLoadNextPage: () -> Unit,
+    onRetry: () -> Unit,
     emptyMessage: String,
     modifier: Modifier = Modifier,
     itemContent: @Composable (T) -> Unit
@@ -955,7 +964,7 @@ private fun <T> SearchGridTab(
         error != null && items.isEmpty() -> {
             ErrorDisplay(
                 errorMessage = error,
-                onRetry = onLoadNextPage,
+                onRetry = onRetry,
                 modifier = Modifier.fillMaxSize()
             )
         }

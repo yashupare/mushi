@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_channel_name">App updates</string>
+    <string name="update_done_title">Mushi updated</string>
+    <string name="update_tap_to_open">Tap to open</string>
+    <string name="update_confirm_title">Mushi update ready</string>
+    <string name="update_tap_to_install">Tap to install</string>
+</resources>

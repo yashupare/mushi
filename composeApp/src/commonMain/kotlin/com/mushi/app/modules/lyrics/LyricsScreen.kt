@@ -63,7 +63,7 @@ import com.mushi.app.resources.iconsax.IconsaxArrowDown4
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import com.mushi.app.generated.resources.Res
-import com.mushi.app.generated.resources.common_unknown_error
+import com.mushi.app.generated.resources.error_try_again
 import com.mushi.app.generated.resources.lyrics_mode_plain
 import com.mushi.app.generated.resources.lyrics_mode_synced
 import com.mushi.app.generated.resources.lyrics_no_plain
@@ -185,7 +185,7 @@ private fun ColumnScope.LyricsBody(uiState: LyricsUiState, viewModel: LyricsView
 
         uiState.error != null -> CenteredMessage {
             Text(
-                text = uiState.error ?: stringResource(Res.string.common_unknown_error),
+                text = stringResource(Res.string.error_try_again),
                 style = AppTheme.typography.bodyLarge,
                 color = MillenniumTheme.colors.danger,
                 textAlign = TextAlign.Center

@@ -29,6 +29,8 @@ import com.composeunstyled.Text
 import com.mushi.app.core.ui.component.ApplicationMainBar
 import com.mushi.app.core.ui.component.LargeTitle
 import com.mushi.app.core.ui.component.LoginRequiredDisplay
+import com.mushi.app.core.ui.component.OfflineDisplay
+import com.mushi.app.modules.connection.ConnectionViewModel
 import com.mushi.app.core.ui.component.rememberLargeTitleState
 import com.mushi.app.core.ui.component.ProfileButton
 import com.mushi.app.modules.plugin.MetadataAuthViewModel
@@ -79,10 +81,12 @@ fun MetadataPluginGuard(
     title: String? = null,
     viewModel: MetadataPluginGuardViewModel = koinViewModel(),
     authViewModel: MetadataAuthViewModel = koinViewModel(),
+    connection: ConnectionViewModel = koinViewModel(),
     content: @Composable () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val authState by authViewModel.uiState.collectAsStateWithLifecycle()
+    val online by connection.online.collectAsStateWithLifecycle()
 
     when (val s = state) {
         is MetadataPluginGuardState.Available ->
@@ -102,10 +106,13 @@ fun MetadataPluginGuard(
                             .verticalScroll(rememberScrollState())
                             .padding(bottom = LocalAppShellBottomInset.current),
                         contentAlignment = Alignment.Center) {
-                        LoginRequiredDisplay(
+                        if (online) LoginRequiredDisplay(
                             pluginName = authState.pluginName,
                             onLogin = authViewModel::login,
                             isLoggingIn = authState.isLoggingIn,
+                            modifier = Modifier.widthIn(max = 420.dp))
+                        else OfflineDisplay(
+                            onRetry = null,
                             modifier = Modifier.widthIn(max = 420.dp))
                     }
                 }

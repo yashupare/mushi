@@ -154,7 +154,7 @@ class LibraryLocalTracksViewModel(
                 }.onFailure { throwable ->
                     if (throwable is CancellationException) throw throwable
                     val message =
-                        throwable.message ?: getString(Res.string.library_local_refresh_failed)
+                        getString(Res.string.library_local_refresh_failed)
                     _state.update {
                         it.copy(error = message)
                     }

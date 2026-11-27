@@ -473,8 +473,6 @@
     <string name="devices_error_connection_failed">कनेक्शन विफल</string>
     <string name="devices_error_connection_lost">कनेक्शन टूट गया</string>
     <string name="devices_error_send_failed">भेजना विफल</string>
-    <string name="devices_error_discovery_failed">खोज विफल: %1$s</string>
-    <string name="devices_error_connect_failed">कनेक्ट नहीं हो सका: %1$s</string>
 
     <!-- Devices: discovery screen -->
     <string name="devices_title">डिवाइस</string>
@@ -586,11 +584,6 @@
 
     <!-- Error display -->
     <string name="error_title">हमें सच में खेद है</string>
-    <string name="error_description">अभी कुछ ठीक से काम नहीं कर रहा है। आपका अनुभव हमारे लिए मायने रखता है, और हम इसे ठीक करने की पूरी कोशिश कर रहे हैं। कृपया फिर से कोशिश करें या नीचे गड़बड़ी की जानकारी देखें।</string>
-    <string name="error_details">गड़बड़ी की जानकारी</string>
-    <string name="error_copy_to_clipboard">क्लिपबोर्ड पर कॉपी करें</string>
-    <string name="error_view_full_log">पूरा लॉग देखें</string>
-    <string name="error_full_log_title">पूरा एरर लॉग</string>
 
     <!-- Collection details -->
     <string name="collection_details_shuffle">शफ़ल</string>

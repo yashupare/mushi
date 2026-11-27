@@ -163,6 +163,7 @@ fun App(
     val appUpdateService: AppUpdateService = koinInject()
     val pluginUpdateService: PluginUpdateService = koinInject()
     val availableAppUpdate by appUpdateService.availableUpdate.collectAsStateWithLifecycle()
+    val appUpdateProgress by appUpdateService.progress.collectAsStateWithLifecycle()
     val availablePluginUpdate by pluginUpdateService.availableUpdate.collectAsStateWithLifecycle()
     val pluginPermissionReview by pluginUpdateService.permissionReview.collectAsStateWithLifecycle()
 
@@ -257,9 +258,19 @@ fun App(
                 availableAppUpdate?.takeIf { com.mushi.app.core.AppEdition.APP_UPDATES_ENABLED }?.let { update ->
                     AppUpdateDialog(
                         update = update,
+                        progress = appUpdateProgress,
                         onDismiss = appUpdateService::dismissUpdate,
                         onIgnore = appUpdateService::ignoreUpdate,
                         onUpdate = {
+                            if (appUpdateService.canUpdateInApp()) {
+                                appUpdateService.startUpdate()
+                            } else {
+                                runCatching { openUrlInBrowser(AppBuildInfo.REPOSITORY_URL + "/releases") }
+                                appUpdateService.dismissUpdate()
+                            }
+                        },
+                        onInstall = appUpdateService::installNow,
+                        onWebsite = {
                             runCatching { openUrlInBrowser(AppBuildInfo.REPOSITORY_URL + "/releases") }
                             appUpdateService.dismissUpdate()
                         })

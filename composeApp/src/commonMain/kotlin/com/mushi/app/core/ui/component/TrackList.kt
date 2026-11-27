@@ -338,7 +338,7 @@ fun TrackList(
                     modifier = Modifier.padding(horizontal = 8.dp))
             }
             TrackListFeedbackRow(
-                message = error,
+                message = stringResource(Res.string.error_try_again),
                 isError = true)
         }
 

@@ -19,6 +19,7 @@ import com.mushi.app.modules.settings.BackupViewModel
 import com.mushi.app.modules.shell.KeepMomentViewModel
 import com.mushi.app.modules.shell.SleepTimerProgress
 import com.mushi.app.modules.history.HistoryViewModel
+import com.mushi.app.modules.connection.ConnectionViewModel
 import com.mushi.app.modules.library.playlist.ImportPlaylistViewModel
 import com.mushi.app.core.i18n.getString
 import com.mushi.app.generated.resources.Res
@@ -80,6 +81,7 @@ import com.mushi.app.modules.saved_tracks.SavedTracksViewModel
 import com.mushi.app.modules.search.SearchRepository
 import com.mushi.app.modules.search.SearchScreenViewModel
 import com.mushi.app.modules.update.AppUpdateService
+import com.mushi.app.modules.update.UpdateCheckViewModel
 import com.mushi.app.modules.update.PluginUpdateService
 import com.mushi.app.modules.settings.SettingsProvider
 import com.mushi.app.modules.settings.SettingsRepository
@@ -107,6 +109,7 @@ import com.mushi.app.core.server.NextTrackPreloader
 import com.mushi.app.core.server.TrackPreloader
 import kotlin.time.Duration
 import com.mushi.app.core.audioplayer.AudioPlayerInterface
+import com.mushi.app.core.audioplayer.PlayerState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -179,7 +182,11 @@ val sharedModules = module {
     viewModelOf(::WelcomeViewModel)
 
     // Updates
-    single { AppUpdateService(get(), get()) } withOptions { createdAtStart() }
+    single {
+        val player = get<AudioPlayerInterface>()
+        AppUpdateService(get(), get(), get()) { player.playerStateFlow.value == PlayerState.PLAYING }
+    } withOptions { createdAtStart() }
+    viewModelOf(::UpdateCheckViewModel)
     single { PluginUpdateService(get(), get()) } withOptions { createdAtStart() }
 
     // Downloads
@@ -345,6 +352,7 @@ val sharedModules = module {
     viewModelOf(::KeepMomentViewModel)
     viewModelOf(::SkyViewModel)
     viewModelOf(::BackupViewModel)
+    viewModelOf(::ConnectionViewModel)
 
     // Playlist import
     viewModel {

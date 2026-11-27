@@ -11,10 +11,6 @@ import org.spotube.plugin_interfaces.plugin_apis.metadata.track.MetadataTrack
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.plugins.logging.LogLevel
-import io.ktor.client.plugins.logging.Logger
-import io.ktor.client.plugins.logging.Logging
-import io.ktor.client.plugins.logging.SIMPLE
 import io.ktor.client.request.get
 import io.ktor.http.userAgent
 import io.ktor.serialization.kotlinx.json.json
@@ -36,10 +32,6 @@ class RealLRCLibLyricsAPI : LyricsAPI, KoinComponent {
     private val httpClientFactory: HttpClientFactory by inject()
     private val httpClient by lazy {
         httpClientFactory.create {
-            install(Logging) {
-                level = LogLevel.ALL
-                logger = Logger.SIMPLE
-            }
             install(ContentNegotiation) {
                 json(HttpJson)
             }

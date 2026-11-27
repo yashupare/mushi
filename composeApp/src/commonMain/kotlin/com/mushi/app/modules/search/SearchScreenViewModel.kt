@@ -1,5 +1,8 @@
 package com.mushi.app.modules.search
 
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
+import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.datastore.preferences.core.edit
@@ -17,6 +20,7 @@ import com.mushi.app.core.di.injectLogger
 import org.koin.core.component.KoinComponent
 import com.mushi.app.modules.library.LibraryRepository
 import com.mushi.app.modules.saved_tracks.SavedTracksRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
@@ -95,6 +99,10 @@ class SearchScreenViewModel(
     val currentUserId: StateFlow<String?> = _currentUserId.asStateFlow()
 
     private var queryJob: Job? = null
+    private var pageJob: Job? = null
+
+    /** What's in the search field. It is the field's own state, so typing is never overwritten. */
+    val queryText = TextFieldState()
 
     private val categoryCoverLoader = CategoryCovers(
         findCover = { category ->
@@ -116,6 +124,9 @@ class SearchScreenViewModel(
 
         loadSupportedSearchTypes()
         viewModelScope.launch { loadCurrentUser() }
+        viewModelScope.launch {
+            snapshotFlow { queryText.text.toString() }.collect(::onQueryChange)
+        }
     }
 
     private suspend fun loadCurrentUser() {
@@ -127,15 +138,26 @@ class SearchScreenViewModel(
     }
 
     fun onQueryChange(query: String) {
+        if (query == _state.value.query) return
         _state.value = _state.value.copy(query = query)
+        // Not saved to recents here: half-typed fragments would fill the list. A search is
+        // remembered when it is submitted or a result is opened (see rememberCurrentQuery).
+        search(afterMs = QUERY_DEBOUNCE_MS)
+    }
+
+    /** Searches for the current query, dropping whatever an earlier one was still loading. */
+    private fun search(afterMs: Long = 0) {
         queryJob?.cancel()
+        pageJob?.cancel()
         queryJob = viewModelScope.launch {
-            delay(QUERY_DEBOUNCE_MS)
-            // Not saved to recents here: half-typed fragments would fill the list. A search is
-            // remembered when it is submitted or a result is opened (see rememberCurrentQuery).
-            refreshCurrentSelection(reset = true)
+            delay(afterMs)
+            // The search types failed to load, say with no network at launch: try again
+            if (_state.value.supportedSearchTypes.isEmpty()) loadSupportedSearchTypes()
+            else refreshCurrentSelection(reset = true)
         }
     }
+
+    fun retry() = search()
 
     /** Adds the current query to the recent searches (on submit, or when a result is opened). */
     fun rememberCurrentQuery() {
@@ -145,15 +167,15 @@ class SearchScreenViewModel(
 
     fun applyRecentSearch(query: String) {
         _state.value = _state.value.copy(query = query)
-        queryJob?.cancel()
-        viewModelScope.launch {
-            saveRecentSearch(query)
-            refreshCurrentSelection(reset = true)
-        }
+        queryText.setTextAndPlaceCursorAtEnd(query)
+        viewModelScope.launch { saveRecentSearch(query) }
+        search()
     }
 
     fun clearQuery() {
         queryJob?.cancel()
+        pageJob?.cancel()
+        queryText.setTextAndPlaceCursorAtEnd("")
         _state.value = _state.value.copy(
             query = "",
             tracks = SearchPagedState(),
@@ -187,11 +209,7 @@ class SearchScreenViewModel(
             artists = SearchPagedState(),
             playlists = SearchPagedState(),
             users = SearchPagedState())
-        if (_state.value.query.isNotBlank()) {
-            viewModelScope.launch {
-                refreshCurrentSelection(reset = true)
-            }
-        }
+        if (_state.value.query.isNotBlank()) search()
     }
 
     fun loadNextTracks() {
@@ -199,7 +217,7 @@ class SearchScreenViewModel(
         if (current.query.isBlank()) return
         if (current.tracks.isLoading || current.tracks.nextPagination == null) return
 
-        viewModelScope.launch {
+        pageJob = viewModelScope.launch {
             loadTracks(reset = false)
         }
     }
@@ -209,7 +227,7 @@ class SearchScreenViewModel(
         if (current.query.isBlank()) return
         if (current.albums.isLoading || current.albums.nextPagination == null) return
 
-        viewModelScope.launch {
+        pageJob = viewModelScope.launch {
             loadAlbums(reset = false)
         }
     }
@@ -219,7 +237,7 @@ class SearchScreenViewModel(
         if (current.query.isBlank()) return
         if (current.artists.isLoading || current.artists.nextPagination == null) return
 
-        viewModelScope.launch {
+        pageJob = viewModelScope.launch {
             loadArtists(reset = false)
         }
     }
@@ -229,7 +247,7 @@ class SearchScreenViewModel(
         if (current.query.isBlank()) return
         if (current.playlists.isLoading || current.playlists.nextPagination == null) return
 
-        viewModelScope.launch {
+        pageJob = viewModelScope.launch {
             loadPlaylists(reset = false)
         }
     }
@@ -239,14 +257,14 @@ class SearchScreenViewModel(
         if (current.query.isBlank()) return
         if (current.users.isLoading || current.users.nextPagination == null) return
 
-        viewModelScope.launch {
+        pageJob = viewModelScope.launch {
             loadUsers(reset = false)
         }
     }
 
     private fun loadSupportedSearchTypes() {
         viewModelScope.launch {
-            runCatching {
+            cancellable {
                 repository.loadSupportedSearchTypes()
             }.onSuccess { supportedTypes ->
                 val ordered = SEARCH_TYPES_ORDER.filter { it in supportedTypes }
@@ -274,6 +292,9 @@ class SearchScreenViewModel(
             }
         }
     }
+
+    private inline fun <T> cancellable(block: () -> T): Result<T> =
+        runCatching(block).onFailure { if (it is CancellationException) throw it }
 
     private suspend fun refreshCurrentSelection(reset: Boolean) {
         val current = _state.value
@@ -312,7 +333,7 @@ class SearchScreenViewModel(
             users = SearchPagedState(isLoading = true))
 
         if (MetadataSupportedSearchType.ALL in supported) {
-            runCatching {
+            cancellable {
                 repository.searchAll(query)
             }.onSuccess { results ->
                 val tracks = results.filterIsInstance<MetadataSearchResult.Track>().map { it.data }
@@ -390,7 +411,7 @@ class SearchScreenViewModel(
             }
         )
 
-        runCatching {
+        cancellable {
             repository.searchTracks(query, pagination)
         }.onSuccess { page ->
             val mergedItems = if (reset) {
@@ -432,7 +453,7 @@ class SearchScreenViewModel(
             }
         )
 
-        runCatching {
+        cancellable {
             repository.searchAlbums(query, pagination)
         }.onSuccess { page ->
             val mergedItems = if (reset) {
@@ -472,7 +493,7 @@ class SearchScreenViewModel(
             }
         )
 
-        runCatching {
+        cancellable {
             repository.searchArtists(query, pagination)
         }.onSuccess { page ->
             val mergedItems = if (reset) {
@@ -512,7 +533,7 @@ class SearchScreenViewModel(
             }
         )
 
-        runCatching {
+        cancellable {
             repository.searchPlaylists(query, pagination)
         }.onSuccess { page ->
             val mergedItems = if (reset) {
@@ -552,7 +573,7 @@ class SearchScreenViewModel(
             }
         )
 
-        runCatching {
+        cancellable {
             repository.searchUsers(query, pagination)
         }.onSuccess { page ->
             val mergedItems = if (reset) {

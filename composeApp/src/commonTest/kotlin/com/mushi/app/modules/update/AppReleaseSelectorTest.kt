@@ -50,4 +50,16 @@ class AppReleaseSelectorTest {
         assertNull(select("6.0.0", "v6.1.0+build.3", ignored = "V6.1.0"))
         assertEquals("v6.2.0", select("6.0.0", "v6.1.0", "v6.2.0", ignored = "v6.1.0"))
     }
+
+    @Test
+    fun picksTheApkAttachedToARelease() {
+        val release = GitHubRelease(
+            tagName = "v1.2.0",
+            assets = listOf(
+                ReleaseAsset("notes.txt", "https://example.com/notes.txt"),
+                ReleaseAsset("Mushi-1.2.0.apk", "https://example.com/Mushi-1.2.0.apk", 10, "sha256:ab")))
+
+        assertEquals(UpdatePackage("https://example.com/Mushi-1.2.0.apk", 10, "sha256:ab"), release.apk())
+        assertNull(GitHubRelease(tagName = "v1.2.0").apk())
+    }
 }

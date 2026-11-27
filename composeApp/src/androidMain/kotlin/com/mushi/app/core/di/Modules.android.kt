@@ -3,16 +3,22 @@ package com.mushi.app.core.di
 import android.content.Context
 import com.mushi.app.core.audioplayer.AudioPlayer
 import com.mushi.app.core.audioplayer.AudioPlayerInterface
+import com.mushi.app.core.network.AndroidNetworkMonitor
+import com.mushi.app.core.network.NetworkMonitor
 import com.mushi.app.core.paths.Paths
 import com.mushi.app.core.share.AndroidShareService
 import com.mushi.app.core.share.ShareService
 import com.mushi.app.media.MediaBrowseHelper
+import com.mushi.app.modules.update.AppInstaller
+import com.mushi.app.update.AndroidAppInstaller
 import com.mushi.app.modules.library.local_tracks.media.AndroidLocalMediaDiscoveryService
 import com.mushi.app.modules.library.local_tracks.media.LocalMediaDiscoveryService
 import org.koin.dsl.module
 
 actual val platformModules = module {
     single { Paths() }
+    single<AppInstaller> { AndroidAppInstaller(get<Context>(), get()) }
+    single<NetworkMonitor> { AndroidNetworkMonitor(get<Context>()) }
     single<AudioPlayerInterface> { AudioPlayer(get<Context>()) }
     single<LocalMediaDiscoveryService> { AndroidLocalMediaDiscoveryService(get()) }
     single<ShareService> { AndroidShareService(get()) }

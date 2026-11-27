@@ -245,7 +245,7 @@ fun RemoteControlScreen(
                         title = stringResource(Res.string.devices_remote_disconnected),
                         message = stringResource(
                             Res.string.devices_remote_connection_error,
-                            connection.message ?: stringResource(connection.fallback)
+                            stringResource(connection.fallback)
                         ),
                         leading = { StatusIcon(com.mushi.app.core.ui.theming.MushiIcons.Cast, isError = true) },
                         actionLabel = stringResource(Res.string.devices_remote_back_to_devices),

@@ -473,8 +473,6 @@
     <string name="devices_error_connection_failed">Bağlantı başarısız</string>
     <string name="devices_error_connection_lost">Bağlantı kesildi</string>
     <string name="devices_error_send_failed">Gönderilemedi</string>
-    <string name="devices_error_discovery_failed">Keşif başarısız: %1$s</string>
-    <string name="devices_error_connect_failed">Bağlanılamadı: %1$s</string>
 
     <!-- Devices: discovery screen -->
     <string name="devices_title">Cihazlar</string>
@@ -586,11 +584,6 @@
 
     <!-- Error display -->
     <string name="error_title">Gerçekten Üzgünüz</string>
-    <string name="error_description">Şu anda bir şeyler düzgün çalışmıyor. Deneyimin bizim için önemli ve bunu düzeltmek için elimizden geleni yapıyoruz. Lütfen tekrar dene veya aşağıdaki hata ayrıntılarına göz at.</string>
-    <string name="error_details">Hata Ayrıntıları</string>
-    <string name="error_copy_to_clipboard">Panoya kopyala</string>
-    <string name="error_view_full_log">Tam günlüğü görüntüle</string>
-    <string name="error_full_log_title">Tam Hata Günlüğü</string>
 
     <!-- Collection details -->
     <string name="collection_details_shuffle">Karıştır</string>

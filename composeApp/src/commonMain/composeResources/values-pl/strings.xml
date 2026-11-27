@@ -481,8 +481,6 @@
     <string name="devices_error_connection_failed">Połączenie nieudane</string>
     <string name="devices_error_connection_lost">Utracono połączenie</string>
     <string name="devices_error_send_failed">Wysyłanie nieudane</string>
-    <string name="devices_error_discovery_failed">Wykrywanie nieudane: %1$s</string>
-    <string name="devices_error_connect_failed">Nie udało się połączyć: %1$s</string>
 
     <!-- Devices: discovery screen -->
     <string name="devices_title">Urządzenia</string>
@@ -596,11 +594,6 @@
 
     <!-- Error display -->
     <string name="error_title">Bardzo nam przykro</string>
-    <string name="error_description">Coś teraz nie działa. Zależy nam na Twoich wrażeniach i robimy wszystko, aby to naprawić. Spróbuj ponownie lub sprawdź szczegóły błędu poniżej.</string>
-    <string name="error_details">Szczegóły błędu</string>
-    <string name="error_copy_to_clipboard">Kopiuj do schowka</string>
-    <string name="error_view_full_log">Pokaż pełny dziennik</string>
-    <string name="error_full_log_title">Pełny dziennik błędu</string>
 
     <!-- Collection details -->
     <string name="collection_details_shuffle">Losowo</string>

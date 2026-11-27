@@ -1,5 +1,6 @@
 package com.mushi.app.modules.settings
 
+import com.mushi.app.modules.jam.ownMessage
 import com.mushi.app.core.ui.component.MushiButton
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -118,7 +119,7 @@ internal fun JamSettingsContent(
                             onFailure = {
                                 stringResource(
                                     Res.string.settings_jam_server_test_fail,
-                                    it.message ?: stringResource(Res.string.jam_error_connection_failed))
+                                    it.ownMessage() ?: stringResource(Res.string.jam_error_connection_failed))
                             })
 
                         SettingCardItem(

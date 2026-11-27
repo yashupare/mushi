@@ -473,8 +473,6 @@
     <string name="devices_error_connection_failed">Verbindung fehlgeschlagen</string>
     <string name="devices_error_connection_lost">Verbindung unterbrochen</string>
     <string name="devices_error_send_failed">Senden fehlgeschlagen</string>
-    <string name="devices_error_discovery_failed">Gerätesuche fehlgeschlagen: %1$s</string>
-    <string name="devices_error_connect_failed">Verbindung fehlgeschlagen: %1$s</string>
 
     <!-- Devices: discovery screen -->
     <string name="devices_title">Geräte</string>
@@ -586,11 +584,6 @@
 
     <!-- Error display -->
     <string name="error_title">Das tut uns wirklich leid</string>
-    <string name="error_description">Gerade funktioniert etwas nicht richtig. Dein Erlebnis ist uns wichtig und wir tun unser Bestes, um das zu beheben. Versuche es bitte erneut oder sieh dir die Fehlerdetails unten an.</string>
-    <string name="error_details">Fehlerdetails</string>
-    <string name="error_copy_to_clipboard">In die Zwischenablage kopieren</string>
-    <string name="error_view_full_log">Vollständiges Protokoll anzeigen</string>
-    <string name="error_full_log_title">Vollständiges Fehlerprotokoll</string>
 
     <!-- Collection details -->
     <string name="collection_details_shuffle">Zufallswiedergabe</string>

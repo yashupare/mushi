@@ -3,7 +3,11 @@ package com.mushi.app.core.di
 import com.mushi.app.core.audioplayer.AudioPlayer
 import com.mushi.app.core.audioplayer.AudioPlayerInterface
 import com.mushi.app.core.mediacontrol.SystemMediaControlService
+import com.mushi.app.core.network.AlwaysOnlineMonitor
+import com.mushi.app.core.network.NetworkMonitor
 import com.mushi.app.core.paths.Paths
+import com.mushi.app.modules.update.AppInstaller
+import com.mushi.app.modules.update.NoAppInstaller
 import com.mushi.app.core.share.JvmShareService
 import com.mushi.app.core.share.ShareService
 import com.mushi.app.core.systemtray.SystemTrayService
@@ -18,6 +22,8 @@ import com.mushi.app.core.window.WindowStateRepository
 
 actual val platformModules = module {
     singleOf(::Paths)
+    single<AppInstaller> { NoAppInstaller() }
+    single<NetworkMonitor> { AlwaysOnlineMonitor() }
     single { WindowStateRepository(get<Database>()) }
     single<AudioPlayerInterface> { AudioPlayer(Unit) }
     single<LocalMediaDiscoveryService> { JvmLocalMediaDiscoveryService() }

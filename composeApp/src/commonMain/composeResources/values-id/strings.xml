@@ -469,8 +469,6 @@
     <string name="devices_error_connection_failed">Koneksi gagal</string>
     <string name="devices_error_connection_lost">Koneksi terputus</string>
     <string name="devices_error_send_failed">Gagal mengirim</string>
-    <string name="devices_error_discovery_failed">Pencarian gagal: %1$s</string>
-    <string name="devices_error_connect_failed">Gagal terhubung: %1$s</string>
 
     <!-- Devices: discovery screen -->
     <string name="devices_title">Perangkat</string>
@@ -581,11 +579,6 @@
 
     <!-- Error display -->
     <string name="error_title">Kami Mohon Maaf</string>
-    <string name="error_description">Ada yang tidak berfungsi saat ini. Pengalamanmu penting bagi kami, dan kami berusaha sebaik mungkin untuk memperbaikinya. Coba lagi atau periksa detail kesalahan di bawah.</string>
-    <string name="error_details">Detail Kesalahan</string>
-    <string name="error_copy_to_clipboard">Salin ke papan klip</string>
-    <string name="error_view_full_log">Lihat log lengkap</string>
-    <string name="error_full_log_title">Log Kesalahan Lengkap</string>
 
     <!-- Collection details -->
     <string name="collection_details_shuffle">Acak</string>

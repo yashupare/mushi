@@ -28,6 +28,8 @@ import com.composeunstyled.Text
 import com.composeunstyled.currentWindowWidthBreakpoint
 import com.mushi.app.getPlatform
 import com.mushi.app.isDesktop
+import com.mushi.app.core.navigation.NavigationCommands
+import com.mushi.app.core.navigation.Routes
 import com.mushi.app.core.ui.component.ApplicationMainBar
 import com.mushi.app.modules.downloads.DownloadsScreen
 import com.mushi.app.modules.history.HistoryScreen
@@ -54,7 +56,10 @@ import compose.icons.feathericons.List
 import com.mushi.app.generated.resources.*
 
 @Composable
-fun LibraryScreen(libraryState: LibraryState = koinInject()) {
+fun LibraryScreen(
+    libraryState: LibraryState = koinInject(),
+    navigationCommands: NavigationCommands = koinInject()
+) {
     val state by libraryState.uiState.collectAsStateWithLifecycle()
     val expandedDesktop = getPlatform().isDesktop() &&
             (currentWindowWidthBreakpoint() isAtLeast WindowBreakpoints.Expanded)
@@ -86,6 +91,7 @@ fun LibraryScreen(libraryState: LibraryState = koinInject()) {
                     libraryState.closeSearch()
                 },
                 onCreatePlaylist = libraryState::showCreatePlaylist,
+                onImportPlaylist = { navigationCommands.navigateTo(Routes.ImportPlaylist) },
                 onRefresh = libraryState::refreshLocalTracks,
                 onToggleView = { libraryState.toggleViewMode(isCompact) },
                 viewMode = viewMode,
@@ -178,7 +184,8 @@ internal fun RowScope.LibraryToolbarActions(
     onRefresh: () -> Unit,
     onToggleView: () -> Unit = {},
     viewMode: LibraryViewMode = state.viewModeOverride ?: defaultLibraryViewMode(!expandedDesktop),
-    compactDesktop: Boolean = false
+    compactDesktop: Boolean = false,
+    onImportPlaylist: () -> Unit = {}
 ) {
     val actionModifier = Modifier.size(if (compactDesktop) 32.dp else 40.dp)
     if (!expandedDesktop && state.searchMode) {
@@ -208,6 +215,13 @@ internal fun RowScope.LibraryToolbarActions(
             }
         }
         if (state.canCreatePlaylist) {
+            MillenniumIconButton(
+                icon = com.mushi.app.core.ui.theming.MushiIcons.Upload,
+                contentDescription = stringResource(Res.string.library_action_import_playlist),
+                onClick = onImportPlaylist,
+                modifier = actionModifier,
+                style = MillenniumIconButtonStyle.Quiet
+            )
             MillenniumIconButton(
                 icon = Iconsax.IconsaxAddSquare,
                 contentDescription = stringResource(Res.string.library_action_create_playlist),

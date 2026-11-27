@@ -9,6 +9,7 @@ import com.mushi.app.modules.devices.RemoteControlScreen
 import com.mushi.app.modules.jam.JamScreen
 import com.mushi.app.modules.home.HomeScreen
 import com.mushi.app.modules.library.LibraryScreen
+import com.mushi.app.modules.library.playlist.ImportPlaylistScreen
 import com.mushi.app.modules.library.local_tracks.LocalFolderScreen
 import com.mushi.app.modules.library.local_tracks.LocalFolderViewModel
 import com.mushi.app.modules.lyrics.LyricsScreen
@@ -85,6 +86,9 @@ sealed interface Routes : NavKey {
 
     @Serializable
     data object Welcome : Routes
+
+    @Serializable
+    data object ImportPlaylist : Routes
 
     @Serializable
     data class LocalFolder(val folderPath: String) : Routes
@@ -198,6 +202,14 @@ val navigationModule = module {
     }
     navigation<Routes.JamSettings> {
         JamSettingsScreen(viewModel = koinViewModel())
+    }
+    navigation<Routes.ImportPlaylist> {
+        MetadataPluginGuard(backButton = true, requireLogin = true) {
+            val navigation = get<NavigationCommands>()
+            ImportPlaylistScreen(
+                viewModel = koinViewModel(),
+                onOpenPlaylist = { navigation.navigateTo(Routes.Playlist(it)) })
+        }
     }
     navigation<Routes.Welcome> {
         WelcomeScreen(viewModel = koinViewModel())

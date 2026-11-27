@@ -19,6 +19,10 @@ import com.mushi.app.modules.settings.BackupViewModel
 import com.mushi.app.modules.shell.KeepMomentViewModel
 import com.mushi.app.modules.shell.SleepTimerProgress
 import com.mushi.app.modules.history.HistoryViewModel
+import com.mushi.app.modules.library.playlist.ImportPlaylistViewModel
+import com.mushi.app.core.i18n.getString
+import com.mushi.app.generated.resources.Res
+import com.mushi.app.generated.resources.import_default_name
 import com.mushi.app.core.jam.JamRoomClient
 import com.mushi.app.core.jam.JamRoomService
 import com.mushi.app.core.navigation.navigationModule
@@ -341,6 +345,25 @@ val sharedModules = module {
     viewModelOf(::KeepMomentViewModel)
     viewModelOf(::SkyViewModel)
     viewModelOf(::BackupViewModel)
+
+    // Playlist import
+    viewModel {
+        val searches = get<SearchRepository>()
+        val library = get<LibraryRepository>()
+        ImportPlaylistViewModel(
+            search = { query -> searches.searchTracks(query).items.map { it.data } },
+            createPlaylist = { name ->
+                library.createPlaylist(
+                    name = name,
+                    description = null,
+                    isPublic = false,
+                    isCollaborating = false,
+                    imageBase64 = "",
+                    trackIds = emptyList())?.id
+            },
+            addTracks = library::addTracksToPlaylist,
+            defaultName = { getString(Res.string.import_default_name) })
+    }
 
     // Listening history
     singleOf(::ListeningHistoryRepository)

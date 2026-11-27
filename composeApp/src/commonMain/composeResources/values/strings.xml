@@ -86,6 +86,33 @@
     <string name="library_action_search">Filter library</string>
     <string name="library_action_close_search">Close filter</string>
     <string name="library_action_create_playlist">Create playlist</string>
+    <string name="library_action_import_playlist">Import playlist</string>
+    <string name="import_title">Import playlist</string>
+    <string name="import_hint">Paste one song per line, like “Title - Artist”, or choose a CSV, text or M3U file.</string>
+    <string name="import_placeholder">Kesariya - Arijit Singh</string>
+    <string name="import_choose_file">Choose a file</string>
+    <string name="import_find">Find songs</string>
+    <string name="import_error_no_songs">There are no songs in this list.</string>
+    <string name="import_error_file">That file couldn’t be read. Choose a text file under 2 MB.</string>
+    <string name="import_error_search">Search stopped working. Check your connection and try again.</string>
+    <string name="import_matching">Finding songs… %1$d of %2$d</string>
+    <string name="import_default_name">Imported playlist</string>
+    <string name="import_found_count">Found %1$d of %2$d. Untick any that are wrong.</string>
+    <string name="import_truncated">Only the first %1$d songs were looked up.</string>
+    <string name="import_asked_for">From your list: %1$s</string>
+    <string name="import_not_found">Not found</string>
+    <string name="import_error_save">The playlist couldn’t be saved. Try again.</string>
+    <string name="import_saving">Saving…</string>
+    <plurals name="import_save">
+        <item quantity="one">Save %1$d song</item>
+        <item quantity="other">Save %1$d songs</item>
+    </plurals>
+    <plurals name="import_saved">
+        <item quantity="one">Saved “%1$s” with %2$d song.</item>
+        <item quantity="other">Saved “%1$s” with %2$d songs.</item>
+    </plurals>
+    <string name="import_open">Open playlist</string>
+    <string name="import_another">Import another</string>
     <string name="library_action_refresh_local_tracks">Refresh local tracks</string>
     <string name="library_action_grid_view">Switch to grid view</string>
     <string name="library_action_list_view">Switch to list view</string>

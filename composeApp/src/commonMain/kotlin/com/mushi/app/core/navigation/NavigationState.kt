@@ -50,6 +50,7 @@ val serializersConfig = SavedStateConfiguration {
             subclass(Routes.Devices::class, Routes.Devices.serializer())
             subclass(Routes.Jam::class, Routes.Jam.serializer())
             subclass(Routes.Welcome::class, Routes.Welcome.serializer())
+            subclass(Routes.ImportPlaylist::class, Routes.ImportPlaylist.serializer())
             subclass(Routes.LocalFolder::class, Routes.LocalFolder.serializer())
         }
     }

@@ -29,6 +29,7 @@ import com.mushi.app.core.navigation.Routes
 import com.mushi.app.core.ui.component.ApplicationMainBar
 import com.mushi.app.generated.resources.*
 import com.mushi.app.modules.settings.sections.appearanceSection
+import com.mushi.app.modules.settings.sections.backupSection
 import com.mushi.app.modules.settings.sections.cacheSection
 import com.mushi.app.modules.settings.sections.desktopSection
 import com.mushi.app.modules.settings.sections.downloadsSection
@@ -148,6 +149,7 @@ private fun CompactSettingsContent(
                 downloadsSection(
                     settings = settings,
                     settingsViewModel = settingsViewModel)
+                backupSection()
                 if (isDesktopPlatform) {
                     desktopSection(
                         settings = settings,

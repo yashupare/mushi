@@ -648,6 +648,7 @@ fun AppExpandedPlayer(
                         textAlign = TextAlign.Start
                     )
                 }
+                KeepMomentButton()
                 PlayerHeartButton(
                     audioPlayerQueue = audioPlayerQueue,
                     savedTracksViewModel = savedTracksViewModel

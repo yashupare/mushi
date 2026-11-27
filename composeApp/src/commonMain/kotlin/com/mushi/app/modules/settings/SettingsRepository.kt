@@ -44,7 +44,7 @@ class SettingsRepository(private val database: Database) : UserSettingsStore {
         private val SUPERSEDED_JAM_SERVER_URLS = setOf("https://jam.spotube.cc", "")
 
         private fun decode(json: String): UserSettings {
-            val settings = settingsJson.decodeFromString<UserSettings>(json)
+            val settings = settingsJson.decodeFromString<UserSettings>(json).withIndiaDefault()
             return if (settings.jamServerUrl.trim().trimEnd('/') in SUPERSEDED_JAM_SERVER_URLS) {
                 settings.copy(jamServerUrl = DEFAULT_JAM_SERVER_URL)
             } else {
@@ -70,7 +70,7 @@ class SettingsRepository(private val database: Database) : UserSettingsStore {
 
     override suspend fun updateSettings(newSettings: UserSettings) {
         database.settingsDataStore.edit { prefs ->
-            prefs[SETTINGS_KEY] = settingsJson.encodeToString(newSettings)
+            prefs[SETTINGS_KEY] = settingsJson.encodeToString(newSettings.copy(indiaDefaultApplied = true))
         }
     }
 

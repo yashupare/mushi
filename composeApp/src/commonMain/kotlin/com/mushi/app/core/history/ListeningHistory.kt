@@ -8,10 +8,30 @@ import kotlinx.serialization.Serializable
 data class HistoryItem(
     val entry: QueueEntry,
     val playedAtMs: List<Long>,
-    val playCount: Int) {
+    val playCount: Int,
+    /** Where playback of the latest play stopped. */
+    val positionMs: Long = 0) {
     val key: String get() = entry.historyKey()
     val lastPlayedAtMs: Long get() = playedAtMs.firstOrNull() ?: 0L
 }
+
+/** Where to pick this song up again, or null if it was barely started or all but finished. */
+internal fun HistoryItem.resumeAtMs(): Long? {
+    val durationMs = entry.durationMs()
+    return positionMs.takeIf { it >= MIN_RESUME_MS && durationMs - it >= MIN_LEFT_MS }
+}
+
+internal fun QueueEntry.durationMs(): Long = when (this) {
+    is QueueEntry.StreamingTrack -> track.durationMs
+    is QueueEntry.LocalTrack -> duration
+}
+
+/** The history with the stop position of one song updated; the order stays. */
+internal fun List<HistoryItem>.withPosition(key: String, positionMs: Long): List<HistoryItem> =
+    map { if (it.key == key) it.copy(positionMs = positionMs) else it }
+
+private const val MIN_RESUME_MS = 15_000L
+private const val MIN_LEFT_MS = 20_000L
 
 internal const val MAX_HISTORY_ITEMS = 200
 internal const val MAX_PLAY_TIMES_PER_ITEM = 20

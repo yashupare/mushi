@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_action_play">Play or pause</string>
+    <string name="widget_action_next">Next song</string>
+    <string name="widget_action_like">Like</string>
+    <string name="widget_action_latest">Play your latest moment</string>
+    <string name="widget_action_path">Play this constellation</string>
+</resources>

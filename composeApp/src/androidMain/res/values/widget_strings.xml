@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_now_playing_label">Now playing</string>
+    <string name="widget_now_playing_description">Cover, play, next and like</string>
+    <string name="widget_slim_label">Slim player</string>
+    <string name="widget_slim_description">A one-row player</string>
+    <string name="widget_mini_sky_label">Mini sky</string>
+    <string name="widget_mini_sky_description">Your kept moments as stars</string>
+    <string name="widget_continue_label">Continue</string>
+    <string name="widget_continue_description">Pick up your last unfinished song</string>
+    <string name="widget_constellations_label">Constellations</string>
+    <string name="widget_constellations_description">One tap to play a saved path</string>
+</resources>

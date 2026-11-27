@@ -5,16 +5,18 @@ import org.spotube.plugin_interfaces.plugin_apis.audio.AudioQuality
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.spotube.millennium.theme.MillenniumPalette
-import androidx.compose.ui.text.intl.Locale
 
 @Serializable
 enum class Theme {
     LIGHT, DARK, SYSTEM
 }
 
-/** The country for the device's region code, such as "IN"; the US when it names none. */
-internal fun countryFor(region: String): CountryCode =
-    CountryCode.entries.firstOrNull { it.code.equals(region, ignoreCase = true) } ?: CountryCode.US
+/**
+ * Bangladesh was once the built-in default and got saved for people who never chose it, so
+ * it is turned into India once. A country picked afterwards is left alone.
+ */
+internal fun UserSettings.withIndiaDefault(): UserSettings =
+    if (!indiaDefaultApplied && country == CountryCode.BD) copy(country = CountryCode.IN) else this
 
 @Serializable
 data class UserSettings(
@@ -23,7 +25,9 @@ data class UserSettings(
     // it had no effect, so reading it would force English on existing users.
     @SerialName("appLanguage")
     val language: SupportedLanguages = SupportedLanguages.SYSTEM,
-    val country: CountryCode = countryFor(Locale.current.region),
+    val country: CountryCode = CountryCode.IN,
+    /** Set from the first save on; see [withIndiaDefault]. */
+    val indiaDefaultApplied: Boolean = false,
 
     // Appearance
     val theme: Theme = Theme.DARK,
@@ -38,6 +42,11 @@ data class UserSettings(
     val cacheFolder: String? = null,
     val cacheSizeLimitMB: Long = -1L,
     val enableEndlessPlayback: Boolean = true,
+    // Sound (Android)
+    val equalizerEnabled: Boolean = false,
+    /** One gain in dB per band, see EQ_BAND_HZ. */
+    val equalizerGains: List<Int> = listOf(0, 0, 0, 0, 0),
+    val volumeEvening: Boolean = false,
     val playbackProxyServerPort: Int = 14769,
 
     // Remote Control (LAN)

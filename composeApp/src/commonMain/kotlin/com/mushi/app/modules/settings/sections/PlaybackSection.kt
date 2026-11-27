@@ -103,6 +103,9 @@ internal fun LazyListScope.playbackSection(
                 }
             )
         }
+        if (com.mushi.app.getPlatform().type == com.mushi.app.PlatformType.Android) {
+            addAll(soundSettingCards(settings, settingsViewModel))
+        }
         addAll(remoteControlSettingCards(settings, settingsViewModel, requestLocalNetworkPermission))
         add {
             val error_whole_number = stringResource(Res.string.settings_error_whole_number)

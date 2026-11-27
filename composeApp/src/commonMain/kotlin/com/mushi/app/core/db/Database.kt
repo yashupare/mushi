@@ -70,6 +70,12 @@ class Database(val paths: Paths) {
         )
     }
 
+    val momentsDataStore: DataStore<Preferences> by lazy {
+        PreferenceDataStoreFactory.createWithPath(
+            produceFile = { "${paths.getApplicationDataDirPath()}/mushi_moments.preferences_pb".toPath() }
+        )
+    }
+
     val windowStateDataStore: DataStore<Preferences> by lazy {
         PreferenceDataStoreFactory.createWithPath(
             produceFile = { "${paths.getApplicationDataDirPath()}/mushi_window.preferences_pb".toPath() }

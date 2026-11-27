@@ -12,6 +12,12 @@ import com.mushi.app.core.discovery.DeviceDiscoveryService
 import com.mushi.app.core.discord.DiscordRpcService
 import com.mushi.app.core.history.ListeningHistoryRecorder
 import com.mushi.app.core.history.ListeningHistoryRepository
+import com.mushi.app.core.moments.ConstellationPlayer
+import com.mushi.app.core.moments.MomentsRepository
+import com.mushi.app.modules.home.SkyViewModel
+import com.mushi.app.modules.settings.BackupViewModel
+import com.mushi.app.modules.shell.KeepMomentViewModel
+import com.mushi.app.modules.shell.SleepTimerProgress
 import com.mushi.app.modules.history.HistoryViewModel
 import com.mushi.app.core.jam.JamRoomClient
 import com.mushi.app.core.jam.JamRoomService
@@ -43,6 +49,7 @@ import com.mushi.app.modules.downloads.DownloadManager
 import com.mushi.app.modules.downloads.DownloadsViewModel
 import com.mushi.app.modules.home.HomeScreenRepository
 import com.mushi.app.modules.home.HomeScreenViewModel
+import com.mushi.app.modules.home.ContinueViewModel
 import com.mushi.app.modules.plugin.MetadataAuthViewModel
 import com.mushi.app.modules.library.LibraryRepository
 import com.mushi.app.modules.library.LibraryState
@@ -119,6 +126,7 @@ val sharedModules = module {
     // Home
     singleOf(::HomeScreenRepository)
     viewModelOf(::HomeScreenViewModel)
+    viewModelOf(::ContinueViewModel)
     viewModelOf(::MetadataAuthViewModel)
 
     // Search
@@ -326,12 +334,20 @@ val sharedModules = module {
 
     single { DiscordRpcService(get(), get()) } withOptions { createdAtStart() }
 
+    // Kept moments and constellations
+    singleOf(::MomentsRepository)
+    single { ConstellationPlayer(get(), get()) }
+    singleOf(::SleepTimerProgress)
+    viewModelOf(::KeepMomentViewModel)
+    viewModelOf(::SkyViewModel)
+    viewModelOf(::BackupViewModel)
+
     // Listening history
     singleOf(::ListeningHistoryRepository)
     viewModelOf(::HistoryViewModel)
     single {
         val repository = get<ListeningHistoryRepository>()
-        ListeningHistoryRecorder(get(), get(), repository::record)
+        ListeningHistoryRecorder(get(), get(), repository::record, repository::savePosition)
     } withOptions { createdAtStart() }
 
     // Scrobbling

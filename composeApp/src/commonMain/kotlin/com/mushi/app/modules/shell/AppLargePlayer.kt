@@ -256,6 +256,7 @@ fun AppLargePlayer(
                         )
                     }
                     Spacer(modifier = Modifier.width(10.dp))
+                    KeepMomentButton()
                     PlayerHeartButton(
                         audioPlayerQueue = audioPlayerQueue,
                         savedTracksViewModel = savedTracksViewModel

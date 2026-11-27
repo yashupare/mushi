@@ -34,6 +34,7 @@ import com.mushi.app.core.audioplayer.AudioPlayer
 import com.mushi.app.core.audioplayer.AudioPlayerInterface
 import com.mushi.app.core.audioplayer.AudioPlayerQueue
 import com.mushi.app.core.audioplayer.QueueEntry
+import com.mushi.app.widget.WidgetUpdater
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -85,25 +86,12 @@ class PlaybackService : MediaLibraryService(), KoinComponent {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Short-lived placeholder until Media3 posts the playback notification. No localized text:
-        // loading it here would block the main thread (see createNotificationChannel).
-        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Mushi")
-            .setSmallIcon(R.drawable.ic_stat_mushi)
-            .setContentIntent(sessionActivity)
-            .setOngoing(true)
-            .build()
-
         // On Android 15+ a service created from the background (e.g. by a jam
         // sync or queue restoration) hits this in startForeground instead of at
         // the startForegroundService call site. Don't crash: playback keeps
         // running in-process, just without the notification until the app is
         // foregrounded and the service can start properly.
-        try {
-            startForeground(NOTIFICATION_ID, notification)
-        } catch (e: Exception) {
-            Log.w(TAG, "startForeground not allowed; continuing without notification", e)
-        }
+        goForeground()
 
         librarySession =
             MediaLibrarySession.Builder(this, audioPlayer.player, LibrarySessionCallback())
@@ -117,6 +105,45 @@ class PlaybackService : MediaLibraryService(), KoinComponent {
             .also { it.start() }
 
         Log.i(TAG, "Library session created")
+    }
+
+    /**
+     * Posts a short-lived placeholder until Media3 posts the playback notification. No localized
+     * text: loading it here would block the main thread (see createNotificationChannel).
+     */
+    private fun goForeground() {
+        val sessionActivity = PendingIntent.getActivity(
+            this,
+            0,
+            Intent(this, MainActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_SINGLE_TOP },
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("Mushi")
+            .setSmallIcon(R.drawable.ic_stat_mushi)
+            .setContentIntent(sessionActivity)
+            .setOngoing(true)
+            .build()
+        try {
+            startForeground(NOTIFICATION_ID, notification)
+        } catch (e: Exception) {
+            Log.w(TAG, "startForeground not allowed; continuing without notification", e)
+        }
+    }
+
+    /** Home screen widget buttons start the service directly (see WidgetUpdater.playback). */
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent?.action?.startsWith("com.mushi.app.widget.") == true) {
+            // Required within seconds of every foreground start
+            goForeground()
+            WidgetUpdater.handleServiceStart(intent, serviceScope) {
+                // Nothing to play after all: don't leave the placeholder behind
+                serviceScope.launch(Dispatchers.Main) {
+                    if (audioPlayer.player.mediaItemCount == 0) stopForeground(STOP_FOREGROUND_REMOVE)
+                    else triggerNotificationUpdate()
+                }
+            }
+        }
+        return super.onStartCommand(intent, flags, startId)
     }
 
     /**

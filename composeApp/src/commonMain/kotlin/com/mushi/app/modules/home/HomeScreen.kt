@@ -96,6 +96,9 @@ fun HomeScreen(viewModel: HomeScreenViewModel) {
     val openSupport = LocalSupportPrompt.current
     val isSmallScreen = currentWindowWidthBreakpoint() isBelow WindowBreakpoints.Medium
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val continueViewModel = org.koin.compose.viewmodel.koinViewModel<ContinueViewModel>()
+    val continueCards by continueViewModel.uiState.collectAsStateWithLifecycle()
+    val skyTime = rememberSkyTime()
     val listState = rememberLazyListState()
     val greeting = stringResource(rememberGreeting())
 
@@ -156,7 +159,9 @@ fun HomeScreen(viewModel: HomeScreenViewModel) {
                         brush = androidx.compose.ui.graphics.Brush.verticalGradient(
                             colors = listOf(washColor, androidx.compose.ui.graphics.Color.Transparent),
                             endY = size.height * 0.55f),
-                        alpha = visible)
+                        alpha = visible * 0.55f)
+                    // The time-of-day sky, over the artwork wash so the sun and moon stay bright
+                    drawSky(skyTime, pageBackground, darkPage, visible)
                 }
             }
     ) {
@@ -202,7 +207,9 @@ fun HomeScreen(viewModel: HomeScreenViewModel) {
                     listState = listState,
                     state = state,
                     onRetry = { viewModel.refresh() },
-                    onGenreSelected = { viewModel.selectGenre(it) })
+                    onGenreSelected = { viewModel.selectGenre(it) },
+                    continueCards = continueCards,
+                    onResume = continueViewModel::resume)
             } else {
                 com.mushi.app.core.ui.component.MushiPullToRefreshBox(
                     // The first load shows the skeleton, so the logo only shows while pulling.
@@ -216,7 +223,9 @@ fun HomeScreen(viewModel: HomeScreenViewModel) {
                         listState = listState,
                         state = state,
                         onRetry = { viewModel.refresh() },
-                        onGenreSelected = { viewModel.selectGenre(it) })
+                        onGenreSelected = { viewModel.selectGenre(it) },
+                    continueCards = continueCards,
+                    onResume = continueViewModel::resume)
                 }
             }
 
@@ -234,7 +243,9 @@ private fun HomeContent(
     listState: androidx.compose.foundation.lazy.LazyListState,
     state: HomeScreenState,
     onRetry: () -> Unit,
-    onGenreSelected: (String) -> Unit
+    onGenreSelected: (String) -> Unit,
+    continueCards: List<ContinueCard>,
+    onResume: (ContinueCard) -> Unit
 ) {
     val shellBottomInset = LocalAppShellBottomInset.current
     val contentPadding = remember(shellBottomInset) {
@@ -278,6 +289,16 @@ private fun HomeContent(
                             onGenreSelected = onGenreSelected
                         )
                         }
+                    }
+                }
+
+                item(key = "sky") {
+                    ConstellationSection()
+                }
+
+                if (continueCards.isNotEmpty()) {
+                    item(key = "continue") {
+                        ContinueRow(continueCards, onResume)
                     }
                 }
 

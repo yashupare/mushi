@@ -95,7 +95,7 @@ fun HistoryScreen(viewModel: HistoryViewModel = koinViewModel()) {
             Text(
                 stringResource(Res.string.history_clear_message),
                 style = AppTheme.typography.bodyMedium,
-                modifier = Modifier.padding(16.dp))
+                modifier = Modifier.padding(vertical = 8.dp))
         }
     }
 }

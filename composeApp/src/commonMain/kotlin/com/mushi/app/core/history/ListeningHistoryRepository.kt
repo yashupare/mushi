@@ -4,6 +4,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.mushi.app.core.audioplayer.QueueEntry
+import com.mushi.app.core.backup.mergeHistory
 import com.mushi.app.core.db.Database
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -18,6 +19,18 @@ class ListeningHistoryRepository(private val database: Database) {
     suspend fun record(entry: QueueEntry, playedAtMs: Long) {
         database.listeningHistoryDataStore.edit { prefs ->
             prefs[HISTORY_KEY] = json.encodeToString(read(prefs).withPlay(entry, playedAtMs))
+        }
+    }
+
+    suspend fun savePosition(key: String, positionMs: Long) {
+        database.listeningHistoryDataStore.edit { prefs ->
+            prefs[HISTORY_KEY] = json.encodeToString(read(prefs).withPosition(key, positionMs))
+        }
+    }
+
+    suspend fun merge(restored: List<HistoryItem>) {
+        database.listeningHistoryDataStore.edit { prefs ->
+            prefs[HISTORY_KEY] = json.encodeToString(mergeHistory(read(prefs), restored))
         }
     }
 

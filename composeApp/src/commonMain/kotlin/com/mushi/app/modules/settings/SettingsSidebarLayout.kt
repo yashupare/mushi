@@ -54,6 +54,7 @@ import com.mushi.app.core.navigation.NavigationCommands
 import com.mushi.app.modules.blacklist.BlacklistContent
 import com.mushi.app.modules.plugin.PluginScreenContent
 import com.mushi.app.modules.settings.sections.appearanceSection
+import com.mushi.app.modules.settings.sections.backupSection
 import com.mushi.app.modules.settings.sections.cacheSection
 import com.mushi.app.modules.settings.sections.desktopSection
 import com.mushi.app.modules.settings.sections.downloadsSection
@@ -305,8 +306,10 @@ private fun SettingsTabContent(
                             SettingsTab.Caching ->
                                 cacheSection(settings, settingsViewModel, includeHeader = false)
 
-                            SettingsTab.Downloads ->
+                            SettingsTab.Downloads -> {
                                 downloadsSection(settings, settingsViewModel, includeHeader = false)
+                                backupSection()
+                            }
 
                             SettingsTab.Desktop ->
                                 desktopSection(settings, settingsViewModel, includeHeader = false)

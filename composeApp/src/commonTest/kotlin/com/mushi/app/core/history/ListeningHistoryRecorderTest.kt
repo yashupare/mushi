@@ -22,6 +22,7 @@ class ListeningHistoryRecorderTest {
     private val player = FakeAudioPlayer()
     private val queue = CurrentEntryQueue()
     private val recorded = mutableListOf<String>()
+    private val positions = mutableListOf<Pair<String, Long>>()
     private var positionMs = 0L
 
     private fun TestScope.start() {
@@ -29,6 +30,7 @@ class ListeningHistoryRecorderTest {
             audioPlayer = player,
             audioPlayerQueue = queue,
             record = { entry, _ -> recorded += entry.url },
+            savePosition = { key, position -> positions += key to position },
             scope = CoroutineScope(backgroundScope.coroutineContext + UnconfinedTestDispatcher(testScheduler)),
             nowMs = { 0L })
     }
@@ -99,6 +101,45 @@ class ListeningHistoryRecorderTest {
         listen(20)
 
         assertEquals(listOf("a", "a"), recorded)
+    }
+
+    @Test
+    fun `saves where a song stopped on pause`() = runTest {
+        start()
+        play("a")
+        listen(20)
+        player.setPlayerState(PlayerState.PAUSED)
+
+        assertEquals(listOf("a" to 20_000L), positions)
+    }
+
+    @Test
+    fun `saves where a song stopped when the next one starts`() = runTest {
+        start()
+        play("a")
+        listen(20)
+        play("b")
+
+        assertEquals("a" to 20_000L, positions.last())
+    }
+
+    @Test
+    fun `saves no position for a skipped song`() = runTest {
+        start()
+        play("a")
+        listen(5)
+        play("b")
+
+        assertEquals(emptyList(), positions)
+    }
+
+    @Test
+    fun `saves the position now and then while playing`() = runTest {
+        start()
+        play("a")
+        listen(50)
+
+        assertEquals(listOf("a" to 45_000L), positions)
     }
 
     private class CurrentEntryQueue : AudioPlayerQueue {

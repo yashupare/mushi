@@ -66,7 +66,8 @@ class PlayerOptionsViewModel(
     private val streamingUrlRepository: StreamingUrlRepository,
     private val cacheManager: CacheManager,
     private val settingsRepository: SettingsRepository,
-    private val pluginManager: AudioPluginSource) : ViewModel() {
+    private val pluginManager: AudioPluginSource,
+    private val sleepTimerProgress: SleepTimerProgress = SleepTimerProgress()) : ViewModel() {
     private val _uiState = MutableStateFlow(PlayerOptionsUiState())
     val uiState: StateFlow<PlayerOptionsUiState> = _uiState.asStateFlow()
 
@@ -117,11 +118,13 @@ class PlayerOptionsViewModel(
             var remainingMs = durationMs
             while (remainingMs > 0L) {
                 _uiState.update { it.copy(sleepTimerRemainingMs = remainingMs) }
+                sleepTimerProgress.fraction.value = 1f - remainingMs.toFloat() / durationMs
                 val tickMs = minOf(remainingMs, MILLIS_PER_SECOND)
                 delay(tickMs.milliseconds)
                 remainingMs -= tickMs
             }
             runCatching { audioPlayer.pause() }
+            sleepTimerProgress.fraction.value = null
             _uiState.update { it.copy(sleepTimerRemainingMs = null, isSleepTimerDialogOpen = false) }
         }
     }
@@ -129,6 +132,7 @@ class PlayerOptionsViewModel(
     fun cancelSleepTimer() {
         sleepTimerJob?.cancel()
         sleepTimerJob = null
+        sleepTimerProgress.fraction.value = null
         _uiState.update { it.copy(sleepTimerRemainingMs = null) }
     }
 

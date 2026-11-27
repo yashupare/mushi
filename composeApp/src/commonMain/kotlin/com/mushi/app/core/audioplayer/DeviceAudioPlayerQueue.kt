@@ -345,14 +345,15 @@ class DeviceAudioPlayerQueue(
             val blacklistedTrackIds = blacklistRepository.blacklistedTracks.first().map { it.id }.toSet()
             val blacklistedArtistIds = blacklistRepository.blacklistedArtists.first().map { it.id }.toSet()
 
+            val queuedTrackIds = streamingTracks.mapTo(mutableSetOf()) { it.track.id }
             val filteredRecommendations = recommendations.filter { track ->
                 val trackBlacklisted = track.id in blacklistedTrackIds
                 val artistBlacklisted = track.artists.any { it.id in blacklistedArtistIds }
-                !trackBlacklisted && !artistBlacklisted
+                !trackBlacklisted && !artistBlacklisted && track.id !in queuedTrackIds
             }
 
             if (filteredRecommendations.isEmpty()) {
-                logger.w { "Endless playback: all recommendations were blacklisted" }
+                logger.w { "Endless playback: all recommendations were blacklisted or already queued" }
                 isFetchingRecommendations = false
                 return
             }

@@ -30,12 +30,12 @@ plugins {
 }
 
 val bundleId = "com.mushi.app"
-val version = "1.0.3"
+val version = "1.1.0"
 // Set to N to release <version>-beta.N (same app id, icons and name as stable); null for a plain stable release.
 // Installer metadata (packageVersion) must stay numeric, so it keeps using plain `version`.
 val betaNumber: Int? = null
 // Betas share the stable app id, so bump this for every beta: Android only updates to a higher versionCode.
-val buildNumber = 50
+val buildNumber = 51
 // Desktop icon channel; Android picks its icons via the stable/nightly product flavor. Use -Pnightly=true.
 val isNightly = providers.gradleProperty("nightly").map { it.toBoolean() }.getOrElse(false)
 val desktopIconDir = if (isNightly) "icons/nightly" else "icons/stable"

@@ -447,8 +447,8 @@
     <string name="welcome_how_step_search_desc">検索クエリは選択したカタログプラグインに直接送られます。Mushiがあなたの好みをプロファイリングすることはありません。</string>
     <string name="welcome_how_step_stream_title">2. ストリームを直接解決</string>
     <string name="welcome_how_step_stream_desc">オーディオはコンテンツサーバーからあなたのマシンへ直接ストリーミングされます。プロキシの経由やリモートでのデータ収集はありません。</string>
-    <string name="welcome_how_step_playback_title">3. ローカルDSPと再生</string>
-    <string name="welcome_how_step_playback_desc">ローカルでデコード・キャッシュされ、イコライザーやオフライン用ダウンロード (任意) も使えます。</string>
+    <string name="welcome_how_step_playback_title">3. ローカル再生</string>
+    <string name="welcome_how_step_playback_desc">ローカルでデコード・キャッシュされ、オフライン用ダウンロード (任意) も使えます。</string>
     <string name="welcome_how_step_lyrics_title">4. 同期歌詞とジャム</string>
     <string name="welcome_how_step_lyrics_desc">カラオケ歌詞が再生位置に合わせて流れ、LANでのリモート操作やグループジャムにも対応します。</string>
     <string name="welcome_how_footer">仲介サーバーはありません。再生はすべてあなたのデバイス上で行われ、設計段階からプライバシーを守ります。</string>

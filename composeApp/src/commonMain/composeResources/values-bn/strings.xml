@@ -451,8 +451,8 @@
     <string name="welcome_how_step_search_desc">সার্চ সরাসরি আপনার বেছে নেওয়া ক্যাটালগ প্লাগইনে যায়। Mushi কখনো আপনার রুচির প্রোফাইল তৈরি করে না।</string>
     <string name="welcome_how_step_stream_title">২. সরাসরি স্ট্রিম রেজোলিউশন</string>
     <string name="welcome_how_step_stream_desc">অডিও কনটেন্ট সার্ভার থেকে সরাসরি আপনার মেশিনে স্ট্রিম হয়। কোনো প্রক্সি বা রিমোট ডেটা সংগ্রহ নেই।</string>
-    <string name="welcome_how_step_playback_title">৩. লোকাল DSP ও প্লেব্যাক</string>
-    <string name="welcome_how_step_playback_desc">ইকুয়ালাইজার কন্ট্রোল ও ঐচ্ছিক অফলাইন ডাউনলোডসহ লোকালি ডিকোড ও ক্যাশ করা হয়।</string>
+    <string name="welcome_how_step_playback_title">৩. লোকাল প্লেব্যাক</string>
+    <string name="welcome_how_step_playback_desc">ঐচ্ছিক অফলাইন ডাউনলোডসহ লোকালি ডিকোড ও ক্যাশ করা হয়।</string>
     <string name="welcome_how_step_lyrics_title">৪. সিঙ্ক করা লিরিক্স ও জ্যাম</string>
     <string name="welcome_how_step_lyrics_desc">কারাওকে লিরিক্স প্লেব্যাকের সময়ের সাথে মিলে চলে, সাথে আছে LAN রিমোট কন্ট্রোল ও গ্রুপ জ্যাম।</string>
     <string name="welcome_how_footer">কোনো মধ্যস্থতাকারী সার্ভার নেই। প্লেব্যাক হয় সরাসরি আপনার ডিভাইসে — ডিজাইনেই প্রাইভেট।</string>

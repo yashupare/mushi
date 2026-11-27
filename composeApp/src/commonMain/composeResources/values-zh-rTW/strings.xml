@@ -447,8 +447,8 @@
     <string name="welcome_how_step_search_desc">查詢會直接送到你選擇的目錄外掛程式。Mushi 絕不分析你的喜好。</string>
     <string name="welcome_how_step_stream_title">2. 直接解析串流</string>
     <string name="welcome_how_step_stream_desc">音訊直接從內容伺服器串流到你的裝置。沒有代理轉送，也沒有遠端資料蒐集。</string>
-    <string name="welcome_how_step_playback_title">3. 本機 DSP 與播放</string>
-    <string name="welcome_how_step_playback_desc">在本機解碼並快取，提供等化器控制及選用的離線下載。</string>
+    <string name="welcome_how_step_playback_title">3. 本機播放</string>
+    <string name="welcome_how_step_playback_desc">在本機解碼並快取，提供選用的離線下載。</string>
     <string name="welcome_how_step_lyrics_title">4. 同步歌詞與 Jam</string>
     <string name="welcome_how_step_lyrics_desc">卡拉 OK 歌詞跟隨播放時間軸，並支援 LAN 遠端控制與群組 Jam。</string>
     <string name="welcome_how_footer">沒有中間伺服器。播放直接在你的裝置上進行 — 隱私從設計開始。</string>

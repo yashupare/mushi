@@ -459,8 +459,8 @@
     <string name="welcome_how_step_search_desc">Запросы идут напрямую в выбранный плагин каталога. Mushi никогда не анализирует ваши вкусы.</string>
     <string name="welcome_how_step_stream_title">2. Прямое получение потока</string>
     <string name="welcome_how_step_stream_desc">Аудио поступает напрямую с серверов контента на ваше устройство. Никаких прокси и удалённого сбора данных.</string>
-    <string name="welcome_how_step_playback_title">3. Локальная обработка и воспроизведение</string>
-    <string name="welcome_how_step_playback_desc">Декодирование и кеширование на устройстве, эквалайзер и загрузка для офлайн-прослушивания по желанию.</string>
+    <string name="welcome_how_step_playback_title">3. Локальное воспроизведение</string>
+    <string name="welcome_how_step_playback_desc">Декодирование и кеширование на устройстве, загрузка для офлайн-прослушивания по желанию.</string>
     <string name="welcome_how_step_lyrics_title">4. Синхронные тексты и джем</string>
     <string name="welcome_how_step_lyrics_desc">Караоке-тексты следуют за воспроизведением, а ещё есть удалённое управление по LAN и групповой джем.</string>
     <string name="welcome_how_footer">Никаких серверов-посредников. Воспроизведение происходит прямо на вашем устройстве — приватность по умолчанию.</string>

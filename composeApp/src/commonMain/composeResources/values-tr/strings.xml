@@ -451,8 +451,8 @@
     <string name="welcome_how_step_search_desc">Sorgular doğrudan seçtiğin katalog eklentisine gider. Mushi zevkinin profilini asla çıkarmaz.</string>
     <string name="welcome_how_step_stream_title">2. Doğrudan Akış Çözümleme</string>
     <string name="welcome_how_step_stream_desc">Ses, içerik sunucularından doğrudan cihazına akar. Proxy aktarması veya uzaktan veri toplama yok.</string>
-    <string name="welcome_how_step_playback_title">3. Yerel DSP ve Çalma</string>
-    <string name="welcome_how_step_playback_desc">Ekolayzer kontrolleri ve isteğe bağlı çevrimdışı indirme ile cihazında çözülür ve önbelleğe alınır.</string>
+    <string name="welcome_how_step_playback_title">3. Yerel Çalma</string>
+    <string name="welcome_how_step_playback_desc">İsteğe bağlı çevrimdışı indirme ile cihazında çözülür ve önbelleğe alınır.</string>
     <string name="welcome_how_step_lyrics_title">4. Senkronize Sözler ve Jam</string>
     <string name="welcome_how_step_lyrics_desc">Karaoke sözleri çalma zamanını takip eder; LAN üzerinden uzaktan kontrol ve Grup Jam de var.</string>
     <string name="welcome_how_footer">Aracı sunucu yok. Çalma doğrudan cihazında gerçekleşir — tasarımı gereği gizli.</string>

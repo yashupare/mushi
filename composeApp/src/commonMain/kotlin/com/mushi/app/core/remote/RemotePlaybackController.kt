@@ -158,6 +158,10 @@ class RemotePlaybackController(
 
     // ---------- Single track actions ----------
 
+    fun requestTrackPlay(track: MetadataTrack) {
+        request(PlaybackDestinationRequest.Track(track.title, PlaybackDestinationAction.Play, track))
+    }
+
     fun requestTrackAddToQueue(track: MetadataTrack) {
         request(PlaybackDestinationRequest.Track(track.title, PlaybackDestinationAction.AddToQueue, track))
     }

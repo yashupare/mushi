@@ -447,8 +447,8 @@
     <string name="welcome_how_step_search_desc">Pencarian langsung dikirim ke plugin katalog pilihanmu. Mushi tidak pernah memprofilkan selera musikmu.</string>
     <string name="welcome_how_step_stream_title">2. Resolusi Stream Langsung</string>
     <string name="welcome_how_step_stream_desc">Audio di-streaming langsung dari server konten ke perangkatmu. Tanpa lompatan proxy atau pengumpulan data jarak jauh.</string>
-    <string name="welcome_how_step_playback_title">3. DSP &amp; Pemutaran Lokal</string>
-    <string name="welcome_how_step_playback_desc">Didekode dan di-cache secara lokal dengan kontrol equalizer dan unduhan offline opsional.</string>
+    <string name="welcome_how_step_playback_title">3. Pemutaran Lokal</string>
+    <string name="welcome_how_step_playback_desc">Didekode dan di-cache secara lokal dengan unduhan offline opsional.</string>
     <string name="welcome_how_step_lyrics_title">4. Lirik Tersinkron &amp; Jam</string>
     <string name="welcome_how_step_lyrics_desc">Lirik karaoke mengikuti waktu pemutaran, dengan kontrol jarak jauh via LAN dan Jam Grup.</string>
     <string name="welcome_how_footer">Tanpa server perantara. Pemutaran terjadi langsung di perangkatmu — privat sejak awal.</string>

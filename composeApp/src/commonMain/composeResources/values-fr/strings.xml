@@ -455,8 +455,8 @@
     <string name="welcome_how_step_search_desc">Les requêtes vont directement au plugin de catalogue choisi. Mushi ne profile jamais vos goûts.</string>
     <string name="welcome_how_step_stream_title">2. Résolution directe des flux</string>
     <string name="welcome_how_step_stream_desc">L'audio est diffusé directement des serveurs de contenu vers votre machine. Aucun proxy ni collecte de données à distance.</string>
-    <string name="welcome_how_step_playback_title">3. DSP et lecture en local</string>
-    <string name="welcome_how_step_playback_desc">Décodage et mise en cache en local, avec égaliseur et téléchargement hors connexion facultatif.</string>
+    <string name="welcome_how_step_playback_title">3. Lecture en local</string>
+    <string name="welcome_how_step_playback_desc">Décodage et mise en cache en local, avec téléchargement hors connexion facultatif.</string>
     <string name="welcome_how_step_lyrics_title">4. Paroles synchronisées et Jam</string>
     <string name="welcome_how_step_lyrics_desc">Les paroles karaoké suivent la position de lecture, avec contrôle à distance en LAN et Jam de groupe.</string>
     <string name="welcome_how_footer">Aucun serveur intermédiaire. La lecture se fait directement sur votre appareil — confidentielle par conception.</string>

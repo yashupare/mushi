@@ -64,6 +64,12 @@ class Database(val paths: Paths) {
         )
     }
 
+    val listeningHistoryDataStore: DataStore<Preferences> by lazy {
+        PreferenceDataStoreFactory.createWithPath(
+            produceFile = { dropIfOversized("${paths.getApplicationDataDirPath()}/mushi_history.preferences_pb".toPath()) }
+        )
+    }
+
     val windowStateDataStore: DataStore<Preferences> by lazy {
         PreferenceDataStoreFactory.createWithPath(
             produceFile = { "${paths.getApplicationDataDirPath()}/mushi_window.preferences_pb".toPath() }

@@ -451,8 +451,8 @@
     <string name="welcome_how_step_search_desc">Suchanfragen gehen direkt an dein gewähltes Katalog-Plugin. Mushi erstellt nie ein Profil deines Geschmacks.</string>
     <string name="welcome_how_step_stream_title">2. Direkte Stream-Auflösung</string>
     <string name="welcome_how_step_stream_desc">Audio wird direkt von den Content-Servern auf dein Gerät gestreamt. Keine Proxy-Umwege, kein Datensammeln aus der Ferne.</string>
-    <string name="welcome_how_step_playback_title">3. Lokales DSP &amp; Wiedergabe</string>
-    <string name="welcome_how_step_playback_desc">Lokal dekodiert und zwischengespeichert, mit Equalizer und optionalem Offline-Download.</string>
+    <string name="welcome_how_step_playback_title">3. Lokale Wiedergabe</string>
+    <string name="welcome_how_step_playback_desc">Lokal dekodiert und zwischengespeichert, mit optionalem Offline-Download.</string>
     <string name="welcome_how_step_lyrics_title">4. Synchronisierte Songtexte &amp; Jam</string>
     <string name="welcome_how_step_lyrics_desc">Karaoke-Songtexte folgen der Wiedergabeposition – dazu LAN-Fernsteuerung und Gruppen-Jam.</string>
     <string name="welcome_how_footer">Keine Zwischenserver. Die Wiedergabe läuft direkt auf deinem Gerät – privat aus Prinzip.</string>

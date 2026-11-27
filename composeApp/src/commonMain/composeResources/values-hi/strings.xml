@@ -451,8 +451,8 @@
     <string name="welcome_how_step_search_desc">सर्च सीधे आपके चुने हुए कैटलॉग प्लगइन तक जाती है। Mushi कभी आपकी पसंद की प्रोफ़ाइल नहीं बनाता।</string>
     <string name="welcome_how_step_stream_title">2. सीधा स्ट्रीम रिज़ॉल्यूशन</string>
     <string name="welcome_how_step_stream_desc">ऑडियो सीधे कंटेंट सर्वर से आपकी मशीन तक स्ट्रीम होता है। न कोई प्रॉक्सी, न रिमोट डेटा संग्रह।</string>
-    <string name="welcome_how_step_playback_title">3. लोकल DSP और प्लेबैक</string>
-    <string name="welcome_how_step_playback_desc">इक्वलाइज़र कंट्रोल और वैकल्पिक ऑफ़लाइन डाउनलोड के साथ लोकल रूप से डिकोड और कैश होता है।</string>
+    <string name="welcome_how_step_playback_title">3. लोकल प्लेबैक</string>
+    <string name="welcome_how_step_playback_desc">वैकल्पिक ऑफ़लाइन डाउनलोड के साथ लोकल रूप से डिकोड और कैश होता है।</string>
     <string name="welcome_how_step_lyrics_title">4. सिंक्ड लिरिक्स और जैम</string>
     <string name="welcome_how_step_lyrics_desc">कराओके लिरिक्स प्लेबैक के समय के साथ चलते हैं, साथ में LAN रिमोट कंट्रोल और ग्रुप जैम।</string>
     <string name="welcome_how_footer">कोई बिचौलिया सर्वर नहीं। प्लेबैक सीधे आपके डिवाइस पर होता है — शुरू से ही निजी।</string>

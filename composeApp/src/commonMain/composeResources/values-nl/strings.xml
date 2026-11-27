@@ -451,8 +451,8 @@
     <string name="welcome_how_step_search_desc">Zoekopdrachten gaan rechtstreeks naar je gekozen catalogusplug-in. Mushi maakt nooit een profiel van je smaak.</string>
     <string name="welcome_how_step_stream_title">2. Directe streams</string>
     <string name="welcome_how_step_stream_desc">Audio wordt rechtstreeks van de contentservers naar je apparaat gestreamd. Geen proxy's ertussen en geen gegevensverzameling op afstand.</string>
-    <string name="welcome_how_step_playback_title">3. Lokale DSP &amp; afspelen</string>
-    <string name="welcome_how_step_playback_desc">Lokaal gedecodeerd en gecachet, met equalizer en optioneel offline downloaden.</string>
+    <string name="welcome_how_step_playback_title">3. Lokaal afspelen</string>
+    <string name="welcome_how_step_playback_desc">Lokaal gedecodeerd en gecachet, met optioneel offline downloaden.</string>
     <string name="welcome_how_step_lyrics_title">4. Gesynchroniseerde songteksten &amp; Jam</string>
     <string name="welcome_how_step_lyrics_desc">Karaokesongteksten volgen de afspeelpositie, met bediening op afstand via LAN en Group Jam.</string>
     <string name="welcome_how_footer">Geen tussenservers. Afspelen gebeurt gewoon op je apparaat — privé vanaf het ontwerp.</string>

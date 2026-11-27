@@ -15,7 +15,8 @@ enum class LibraryTab(val icon: ImageVector) {
     Albums(com.mushi.app.core.ui.theming.MushiIcons.Album),
     Artists(com.mushi.app.core.ui.theming.MushiIcons.User),
     LocalTracks(com.mushi.app.core.ui.theming.MushiIcons.Playlist),
-    Downloads(com.mushi.app.core.ui.theming.MushiIcons.Download);
+    Downloads(com.mushi.app.core.ui.theming.MushiIcons.Download),
+    History(com.mushi.app.core.ui.theming.MushiIcons.MusicNote);
 
     val titleResource: StringResource
         get() = when (this) {
@@ -24,6 +25,7 @@ enum class LibraryTab(val icon: ImageVector) {
             Artists -> Res.string.library_tab_artists
             LocalTracks -> Res.string.library_tab_local_tracks
             Downloads -> Res.string.library_tab_downloads
+            History -> Res.string.library_tab_history
         }
 
     val filterPlaceholder: StringResource
@@ -32,6 +34,6 @@ enum class LibraryTab(val icon: ImageVector) {
             Albums -> Res.string.library_filter_albums
             Artists -> Res.string.library_filter_artists
             LocalTracks -> Res.string.library_filter_local_tracks
-            Downloads -> Res.string.search_filter_placeholder
+            Downloads, History -> Res.string.search_filter_placeholder
         }
 }

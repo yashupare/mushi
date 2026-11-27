@@ -30,6 +30,7 @@ import com.mushi.app.getPlatform
 import com.mushi.app.isDesktop
 import com.mushi.app.core.ui.component.ApplicationMainBar
 import com.mushi.app.modules.downloads.DownloadsScreen
+import com.mushi.app.modules.history.HistoryScreen
 import com.mushi.app.modules.library.album.LibraryAlbumsScreen
 import com.mushi.app.modules.library.artist.LibraryArtistsScreen
 import com.mushi.app.modules.library.local_tracks.LibraryLocalTracksScreen
@@ -124,6 +125,7 @@ fun LibraryScreen(libraryState: LibraryState = koinInject()) {
                 }
                 LibraryTab.LocalTracks -> LibraryLocalTracksScreen()
                 LibraryTab.Downloads -> DownloadsScreen()
+                LibraryTab.History -> HistoryScreen()
             }
         }
     }

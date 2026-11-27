@@ -459,8 +459,8 @@
     <string name="welcome_how_step_search_desc">Zapytania trafiają prosto do wybranej wtyczki katalogu. Mushi nigdy nie profiluje Twojego gustu.</string>
     <string name="welcome_how_step_stream_title">2. Bezpośrednie pozyskiwanie strumienia</string>
     <string name="welcome_how_step_stream_desc">Dźwięk płynie bezpośrednio z serwerów treści na Twój komputer. Bez pośrednich serwerów proxy i zdalnego zbierania danych.</string>
-    <string name="welcome_how_step_playback_title">3. Lokalne DSP i odtwarzanie</string>
-    <string name="welcome_how_step_playback_desc">Dekodowanie i buforowanie odbywa się lokalnie, z korektorem i opcjonalnym pobieraniem offline.</string>
+    <string name="welcome_how_step_playback_title">3. Lokalne odtwarzanie</string>
+    <string name="welcome_how_step_playback_desc">Dekodowanie i buforowanie odbywa się lokalnie, z opcjonalnym pobieraniem offline.</string>
     <string name="welcome_how_step_lyrics_title">4. Zsynchronizowane teksty i Jam</string>
     <string name="welcome_how_step_lyrics_desc">Teksty karaoke podążają za odtwarzaniem, a do tego zdalne sterowanie w sieci LAN i Grupowy Jam.</string>
     <string name="welcome_how_footer">Żadnych serwerów pośredniczących. Odtwarzanie odbywa się na Twoim urządzeniu — prywatność w standardzie.</string>

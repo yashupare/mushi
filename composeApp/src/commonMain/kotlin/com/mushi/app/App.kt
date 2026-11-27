@@ -64,6 +64,7 @@ import com.mushi.app.generated.resources.jam_screen_title
 import com.mushi.app.generated.resources.library_tab_albums
 import com.mushi.app.generated.resources.library_tab_artists
 import com.mushi.app.generated.resources.library_tab_downloads
+import com.mushi.app.generated.resources.library_tab_history
 import com.mushi.app.generated.resources.library_tab_local_tracks
 import com.mushi.app.generated.resources.library_tab_playlists
 import com.mushi.app.generated.resources.library_toolbar_compact_title
@@ -121,6 +122,12 @@ val sidebarTabs = tabs + listOf(
                 com.mushi.app.core.ui.theming.MushiIcons.Download,
                 Routes.Library,
                 LibraryTab.Downloads
+            ),
+            NavigationItem.Tab(
+                Res.string.library_tab_history,
+                com.mushi.app.core.ui.theming.MushiIcons.MusicNote,
+                Routes.Library,
+                LibraryTab.History
             )
         )
     ),

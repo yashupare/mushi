@@ -451,8 +451,8 @@
     <string name="welcome_how_step_search_desc">جستجوها مستقیماً به افزونهٔ کاتالوگ انتخابی شما می‌روند. Mushi هرگز از سلیقهٔ شما نمایه نمی‌سازد.</string>
     <string name="welcome_how_step_stream_title">۲. دریافت مستقیم جریان</string>
     <string name="welcome_how_step_stream_desc">صدا مستقیماً از سرورهای محتوا به دستگاه شما می‌رسد. بدون پراکسی میانی یا جمع‌آوری داده از راه دور.</string>
-    <string name="welcome_how_step_playback_title">۳. پردازش صدا و پخش محلی</string>
-    <string name="welcome_how_step_playback_desc">رمزگشایی و ذخیرهٔ محلی، همراه با اکولایزر و دانلود آفلاین اختیاری.</string>
+    <string name="welcome_how_step_playback_title">۳. پخش محلی</string>
+    <string name="welcome_how_step_playback_desc">رمزگشایی و ذخیرهٔ محلی، همراه با دانلود آفلاین اختیاری.</string>
     <string name="welcome_how_step_lyrics_title">۴. متن همگام و جم</string>
     <string name="welcome_how_step_lyrics_desc">متن کارائوکه با زمان پخش همگام می‌شود، همراه با کنترل از راه دور در LAN و جم گروهی.</string>
     <string name="welcome_how_footer">بدون سرور واسطه. پخش درست روی دستگاه شما انجام می‌شود — خصوصی از پایه.</string>

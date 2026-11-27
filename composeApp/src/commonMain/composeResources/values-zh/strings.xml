@@ -447,8 +447,8 @@
     <string name="welcome_how_step_search_desc">查询直接发送到你选择的曲库插件。Mushi 绝不分析你的喜好。</string>
     <string name="welcome_how_step_stream_title">2. 直接解析音频流</string>
     <string name="welcome_how_step_stream_desc">音频直接从内容服务器传输到你的设备。没有代理中转，也没有远程数据收集。</string>
-    <string name="welcome_how_step_playback_title">3. 本地 DSP 与播放</string>
-    <string name="welcome_how_step_playback_desc">在本地解码和缓存，提供均衡器控制和可选的离线下载。</string>
+    <string name="welcome_how_step_playback_title">3. 本地播放</string>
+    <string name="welcome_how_step_playback_desc">在本地解码和缓存，提供可选的离线下载。</string>
     <string name="welcome_how_step_lyrics_title">4. 同步歌词与一起听</string>
     <string name="welcome_how_step_lyrics_desc">卡拉 OK 歌词跟随播放进度，并支持 LAN 远程控制和一起听。</string>
     <string name="welcome_how_footer">没有中间服务器。播放直接在你的设备上进行 — 隐私从设计开始。</string>

@@ -467,8 +467,8 @@
     <string name="welcome_how_step_search_desc">تذهب الاستعلامات مباشرةً إلى إضافة الكتالوج التي اخترتها. لا ينشئ Mushi أبدًا ملفًا تعريفيًا لذوقك.</string>
     <string name="welcome_how_step_stream_title">2. تحديد البث المباشر</string>
     <string name="welcome_how_step_stream_desc">يُبث الصوت مباشرةً من خوادم المحتوى إلى جهازك. بلا قفزات عبر وكلاء ولا جمع للبيانات عن بُعد.</string>
-    <string name="welcome_how_step_playback_title">3. معالجة صوتية وتشغيل محليان</string>
-    <string name="welcome_how_step_playback_desc">يتم فك الترميز والتخزين المؤقت محليًا مع عناصر تحكم في المعادل وخيار التنزيل للاستماع دون اتصال.</string>
+    <string name="welcome_how_step_playback_title">3. تشغيل محلي</string>
+    <string name="welcome_how_step_playback_desc">يتم فك الترميز والتخزين المؤقت محليًا مع خيار التنزيل للاستماع دون اتصال.</string>
     <string name="welcome_how_step_lyrics_title">4. كلمات متزامنة وجام</string>
     <string name="welcome_how_step_lyrics_desc">تتبع كلمات الكاريوكي توقيت التشغيل، مع تحكم عن بُعد عبر LAN والجام الجماعي.</string>
     <string name="welcome_how_footer">لا خوادم وسيطة. يتم التشغيل على جهازك مباشرةً — الخصوصية في صميم التصميم.</string>

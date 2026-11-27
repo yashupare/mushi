@@ -447,8 +447,8 @@
     <string name="welcome_how_step_search_desc">Truy vấn được gửi thẳng tới plugin danh mục bạn chọn. Mushi không bao giờ lập hồ sơ sở thích của bạn.</string>
     <string name="welcome_how_step_stream_title">2. Phân giải luồng trực tiếp</string>
     <string name="welcome_how_step_stream_desc">Âm thanh được truyền trực tiếp từ máy chủ nội dung tới máy của bạn. Không qua proxy, không thu thập dữ liệu từ xa.</string>
-    <string name="welcome_how_step_playback_title">3. DSP &amp; phát lại cục bộ</string>
-    <string name="welcome_how_step_playback_desc">Giải mã và lưu đệm cục bộ với bộ chỉnh âm và tùy chọn tải xuống ngoại tuyến.</string>
+    <string name="welcome_how_step_playback_title">3. Phát lại cục bộ</string>
+    <string name="welcome_how_step_playback_desc">Giải mã và lưu đệm cục bộ với tùy chọn tải xuống ngoại tuyến.</string>
     <string name="welcome_how_step_lyrics_title">4. Lời bài hát đồng bộ &amp; Jam</string>
     <string name="welcome_how_step_lyrics_desc">Lời karaoke bám theo thời điểm phát, cùng với điều khiển từ xa qua LAN và Jam nhóm.</string>
     <string name="welcome_how_footer">Không có máy chủ trung gian. Việc phát nhạc diễn ra ngay trên thiết bị của bạn — riêng tư từ thiết kế.</string>

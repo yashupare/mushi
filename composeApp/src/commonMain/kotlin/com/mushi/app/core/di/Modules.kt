@@ -10,6 +10,9 @@ import com.mushi.app.core.audioplayer.QueueStateRepository
 import com.mushi.app.core.db.Database
 import com.mushi.app.core.discovery.DeviceDiscoveryService
 import com.mushi.app.core.discord.DiscordRpcService
+import com.mushi.app.core.history.ListeningHistoryRecorder
+import com.mushi.app.core.history.ListeningHistoryRepository
+import com.mushi.app.modules.history.HistoryViewModel
 import com.mushi.app.core.jam.JamRoomClient
 import com.mushi.app.core.jam.JamRoomService
 import com.mushi.app.core.navigation.navigationModule
@@ -322,6 +325,14 @@ val sharedModules = module {
     }
 
     single { DiscordRpcService(get(), get()) } withOptions { createdAtStart() }
+
+    // Listening history
+    singleOf(::ListeningHistoryRepository)
+    viewModelOf(::HistoryViewModel)
+    single {
+        val repository = get<ListeningHistoryRepository>()
+        ListeningHistoryRecorder(get(), get(), repository::record)
+    } withOptions { createdAtStart() }
 
     // Scrobbling
     single { ScrobbleManager(get(), get(), get()) } withOptions { createdAtStart() }

@@ -447,8 +447,8 @@
     <string name="welcome_how_step_search_desc">คำค้นหาส่งตรงไปยังปลั๊กอินแคตตาล็อกที่คุณเลือก Mushi ไม่เคยเก็บข้อมูลรสนิยมของคุณ</string>
     <string name="welcome_how_step_stream_title">2. ระบุสตรีมโดยตรง</string>
     <string name="welcome_how_step_stream_desc">เสียงสตรีมตรงจากเซิร์ฟเวอร์เนื้อหามายังเครื่องของคุณ ไม่ผ่านพร็อกซีหรือการเก็บข้อมูลจากระยะไกล</string>
-    <string name="welcome_how_step_playback_title">3. DSP และการเล่นในเครื่อง</string>
-    <string name="welcome_how_step_playback_desc">ถอดรหัสและแคชในเครื่อง พร้อมอีควอไลเซอร์และการดาวน์โหลดแบบออฟไลน์ (ไม่บังคับ)</string>
+    <string name="welcome_how_step_playback_title">3. การเล่นในเครื่อง</string>
+    <string name="welcome_how_step_playback_desc">ถอดรหัสและแคชในเครื่อง พร้อมการดาวน์โหลดแบบออฟไลน์ (ไม่บังคับ)</string>
     <string name="welcome_how_step_lyrics_title">4. เนื้อเพลงแบบซิงค์และแจม</string>
     <string name="welcome_how_step_lyrics_desc">เนื้อเพลงคาราโอเกะเลื่อนตามเวลาที่เล่น พร้อมการควบคุมระยะไกลผ่าน LAN และแจมกลุ่ม</string>
     <string name="welcome_how_footer">ไม่มีเซิร์ฟเวอร์คนกลาง การเล่นเกิดขึ้นบนอุปกรณ์ของคุณ — เป็นส่วนตัวตั้งแต่การออกแบบ</string>

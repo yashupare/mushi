@@ -459,8 +459,8 @@
     <string name="welcome_how_step_search_desc">Запити надходять безпосередньо до вибраного плагіна каталогу. Mushi ніколи не аналізує ваші смаки.</string>
     <string name="welcome_how_step_stream_title">2. Пряме отримання потоку</string>
     <string name="welcome_how_step_stream_desc">Аудіо надходить безпосередньо із серверів контенту на ваш пристрій. Жодних проксі та віддаленого збору даних.</string>
-    <string name="welcome_how_step_playback_title">3. Локальна обробка й відтворення</string>
-    <string name="welcome_how_step_playback_desc">Декодування й кешування на пристрої, еквалайзер і завантаження для офлайн-прослуховування за бажанням.</string>
+    <string name="welcome_how_step_playback_title">3. Локальне відтворення</string>
+    <string name="welcome_how_step_playback_desc">Декодування й кешування на пристрої, завантаження для офлайн-прослуховування за бажанням.</string>
     <string name="welcome_how_step_lyrics_title">4. Синхронні тексти й джем</string>
     <string name="welcome_how_step_lyrics_desc">Караоке-тексти стежать за відтворенням, а ще є віддалене керування через LAN і груповий джем.</string>
     <string name="welcome_how_footer">Жодних серверів-посередників. Відтворення відбувається просто на вашому пристрої — приватність за замовчуванням.</string>

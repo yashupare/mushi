@@ -447,8 +447,8 @@
     <string name="welcome_how_step_search_desc">검색어는 선택한 카탈로그 플러그인으로 바로 전달돼요. Mushi는 취향을 분석하지 않아요.</string>
     <string name="welcome_how_step_stream_title">2. 직접 스트림 확인</string>
     <string name="welcome_how_step_stream_desc">오디오는 콘텐츠 서버에서 기기로 바로 스트리밍돼요. 프록시 경유나 원격 데이터 수집은 없어요.</string>
-    <string name="welcome_how_step_playback_title">3. 로컬 DSP &amp; 재생</string>
-    <string name="welcome_how_step_playback_desc">이퀄라이저 컨트롤과 선택적 오프라인 다운로드를 지원하며 기기에서 디코딩하고 캐시해요.</string>
+    <string name="welcome_how_step_playback_title">3. 로컬 재생</string>
+    <string name="welcome_how_step_playback_desc">선택적 오프라인 다운로드를 지원하며 기기에서 디코딩하고 캐시해요.</string>
     <string name="welcome_how_step_lyrics_title">4. 싱크 가사 &amp; 잼</string>
     <string name="welcome_how_step_lyrics_desc">노래방 가사가 재생 시간에 맞춰 흐르고, LAN 원격 제어와 그룹 잼도 지원해요.</string>
     <string name="welcome_how_footer">중개 서버가 없어요. 재생은 기기에서 직접 이루어져요 — 설계부터 개인정보를 보호해요.</string>

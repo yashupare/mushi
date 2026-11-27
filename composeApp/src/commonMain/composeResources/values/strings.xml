@@ -16,6 +16,18 @@
     <string name="library_tab_artists">Artists</string>
     <string name="library_tab_local_tracks">Local Tracks</string>
     <string name="library_tab_downloads">Downloads</string>
+    <string name="library_tab_history">History</string>
+    <string name="history_today">Today</string>
+    <string name="history_yesterday">Yesterday</string>
+    <string name="history_empty">No listening history yet</string>
+    <string name="history_empty_hint">Songs you listen to show up here. The list stays on this device.</string>
+    <string name="history_clear">Clear history</string>
+    <string name="history_clear_title">Clear listening history?</string>
+    <string name="history_clear_message">This removes every song from your history. It can’t be undone.</string>
+    <plurals name="history_play_count">
+        <item quantity="one">%1$d play</item>
+        <item quantity="other">%1$d plays</item>
+    </plurals>
     <string name="library_filter_playlists">Search saved playlists…</string>
     <string name="library_filter_albums">Search saved albums…</string>
     <string name="library_filter_artists">Search saved artists…</string>
@@ -632,8 +644,8 @@
     <string name="welcome_how_step_search_desc">Queries go straight to your chosen catalog plugin. Mushi never profiles your taste.</string>
     <string name="welcome_how_step_stream_title">2. Direct Stream Resolution</string>
     <string name="welcome_how_step_stream_desc">Audio streams directly from content servers to your machine. No proxy hops or remote data harvesting.</string>
-    <string name="welcome_how_step_playback_title">3. Local DSP &amp; Playback</string>
-    <string name="welcome_how_step_playback_desc">Decoded and cached locally with equalizer controls and optional offline download.</string>
+    <string name="welcome_how_step_playback_title">3. Local Playback</string>
+    <string name="welcome_how_step_playback_desc">Decoded and cached locally, with optional offline download.</string>
     <string name="welcome_how_step_lyrics_title">4. Synced Lyrics &amp; Jam</string>
     <string name="welcome_how_step_lyrics_desc">Karaoke lyrics track the playback timestamp, with LAN remote control and Group Jam.</string>
     <string name="welcome_how_footer">No middleman servers. Playback happens right on your device — private by design.</string>

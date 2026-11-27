@@ -455,8 +455,8 @@
     <string name="welcome_how_step_search_desc">As buscas vão direto para o plugin de catálogo que você escolheu. O Mushi nunca traça o perfil do seu gosto.</string>
     <string name="welcome_how_step_stream_title">2. Resolução direta do stream</string>
     <string name="welcome_how_step_stream_desc">O áudio vem direto dos servidores de conteúdo para a sua máquina. Sem saltos por proxy nem coleta remota de dados.</string>
-    <string name="welcome_how_step_playback_title">3. DSP e reprodução locais</string>
-    <string name="welcome_how_step_playback_desc">Decodificado e armazenado em cache localmente, com controles de equalizador e download offline opcional.</string>
+    <string name="welcome_how_step_playback_title">3. Reprodução local</string>
+    <string name="welcome_how_step_playback_desc">Decodificado e armazenado em cache localmente, com download offline opcional.</string>
     <string name="welcome_how_step_lyrics_title">4. Letras sincronizadas e Jam</string>
     <string name="welcome_how_step_lyrics_desc">As letras de karaokê acompanham o tempo da reprodução, com controle remoto via LAN e Jam em grupo.</string>
     <string name="welcome_how_footer">Sem servidores intermediários. A reprodução acontece no seu dispositivo — privado por natureza.</string>

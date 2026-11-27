@@ -52,9 +52,9 @@ class LibraryState : ViewModel() {
     ) { (tab, query), searching, creating, modes, refreshing ->
         LibraryToolbarUiState(
             currentTab = tab,
-            searchMode = tab != LibraryTab.Downloads && (searching || query.isNotEmpty()),
+            searchMode = tab.canFilter && (searching || query.isNotEmpty()),
             searchState = searchStates.getValue(tab),
-            canFilter = tab != LibraryTab.Downloads,
+            canFilter = tab.canFilter,
             canCreatePlaylist = tab == LibraryTab.Playlists,
             canRefresh = tab == LibraryTab.LocalTracks,
             isRefreshing = tab == LibraryTab.LocalTracks && refreshing,
@@ -76,11 +76,11 @@ class LibraryState : ViewModel() {
     fun onTabSelected(tab: LibraryTab) {
         currentTab.value = tab
         createPlaylistVisible.value = false
-        if (tab == LibraryTab.Downloads) searchMode.value = false
+        if (!tab.canFilter) searchMode.value = false
     }
 
     fun openSearch() {
-        if (currentTab.value != LibraryTab.Downloads) searchMode.value = true
+        if (currentTab.value.canFilter) searchMode.value = true
     }
 
     fun closeSearch() {
@@ -114,6 +114,9 @@ class LibraryState : ViewModel() {
         }
     }
 }
+
+private val LibraryTab.canFilter: Boolean
+    get() = this != LibraryTab.Downloads && this != LibraryTab.History
 
 internal fun defaultLibraryViewMode(isCompact: Boolean) =
     if (isCompact) LibraryViewMode.List else LibraryViewMode.Grid
